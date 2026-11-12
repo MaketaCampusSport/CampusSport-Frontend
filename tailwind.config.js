@@ -7,18 +7,19 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
+        sans: ['Barlow', 'sans-serif'],
+        condensed: ['Barlow Condensed', 'sans-serif'],
       },
       colors: {
-        brandYellow: '#FFCC00', // Galbenul din prototip
-        brandDark: '#13151A',   // Bleumarinul foarte închis din sidebar
+        brandYellow: '#FFCC00',
+        brandDark: '#1A2238', 
         brandBlue: '#2563EB',
         brandRed: '#EF4444',
-        brandGray: '#F8FAFC',   // Fundalul paginilor de admin
+        brandLightBg: '#F8FAFC', 
       },
       borderRadius: {
+        '2xl': '1rem',
         '3xl': '1.5rem',
-        '4xl': '2rem',
       }
     },
   },
