@@ -1,17 +1,65 @@
 import { useState } from 'react';
 import AdminDashboard from './pages/AdminDashboard';
 import AvailabilityScreen from './pages/AvailabilityScreen';
-import StartScreen from './pages/StartScreen';
+import BookingConfirmScreen from './pages/BookingConfirmScreen';
+import StartScreen, { DEFAULT_UPCOMING_RESERVATION } from './pages/StartScreen';
 import { SelectedSlotSummary } from './data/availabilityMockData';
+import { ActiveReservation } from './components/QrTicketCard';
 
 function App() {
   const [roleView, setRoleView] = useState<'student' | 'admin'>('student');
   const [selectedSportId, setSelectedSportId] = useState<string | null>(null);
   const [pendingBooking, setPendingBooking] = useState<SelectedSlotSummary | null>(null);
 
+  const totalEntries = 4;
+  const [remainingEntries, setRemainingEntries] = useState<number>(3);
+  const [upcomingReservation, setUpcomingReservation] = useState<ActiveReservation>(
+    DEFAULT_UPCOMING_RESERVATION
+  );
+
   const handleSelectSport = (sportId: string) => {
     setSelectedSportId(sportId);
     setPendingBooking(null);
+  };
+
+  const handleBookingComplete = (createdReservation: ActiveReservation) => {
+    setUpcomingReservation(createdReservation);
+    setRemainingEntries((prev) => Math.max(0, prev - 1));
+    setPendingBooking(null);
+    setSelectedSportId(null);
+  };
+
+  const renderStudentFlow = () => {
+    if (pendingBooking) {
+      return (
+        <BookingConfirmScreen
+          selection={pendingBooking}
+          remainingEntries={remainingEntries}
+          totalEntries={totalEntries}
+          onBack={() => setPendingBooking(null)}
+          onComplete={handleBookingComplete}
+        />
+      );
+    }
+
+    if (selectedSportId) {
+      return (
+        <AvailabilityScreen
+          sportId={selectedSportId}
+          onBack={() => setSelectedSportId(null)}
+          onContinue={(selection) => setPendingBooking(selection)}
+        />
+      );
+    }
+
+    return (
+      <StartScreen
+        remainingEntries={remainingEntries}
+        totalEntries={totalEntries}
+        upcomingReservation={upcomingReservation}
+        onSelectSport={handleSelectSport}
+      />
+    );
   };
 
   return (
@@ -24,6 +72,7 @@ function App() {
             type="button"
             onClick={() => {
               setRoleView('student');
+              setPendingBooking(null);
               setSelectedSportId(null);
             }}
             className={`px-3 py-1 rounded-full font-bold transition-colors ${
@@ -48,27 +97,7 @@ function App() {
         </div>
       </div>
 
-      {roleView === 'admin' ? (
-        <AdminDashboard />
-      ) : selectedSportId ? (
-        <>
-          <AvailabilityScreen
-            sportId={selectedSportId}
-            onBack={() => setSelectedSportId(null)}
-            onContinue={(selection) => setPendingBooking(selection)}
-          />
-
-          {/* Temporary confirmation preview until MAKETA-70 is implemented */}
-          {pendingBooking && (
-            <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-40 bg-brandDark text-white text-xs px-4 py-2.5 rounded-full shadow-lg">
-              Slot pregătit pentru Pasul 2 (MAKETA-70): {pendingBooking.resourceName} ·{' '}
-              {pendingBooking.dayLabel}, {pendingBooking.time}
-            </div>
-          )}
-        </>
-      ) : (
-        <StartScreen onSelectSport={handleSelectSport} />
-      )}
+      {roleView === 'admin' ? <AdminDashboard /> : renderStudentFlow()}
     </div>
   );
 }

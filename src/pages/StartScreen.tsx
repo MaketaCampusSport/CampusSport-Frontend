@@ -54,7 +54,7 @@ const SPORTS_GRID: SportCardItem[] = [
   },
 ];
 
-const UPCOMING_RESERVATION: ActiveReservation = {
+export const DEFAULT_UPCOMING_RESERVATION: ActiveReservation = {
   id: 'res-8924',
   code: '#RES-8924',
   sportName: 'Fotbal',
@@ -68,24 +68,23 @@ const UPCOMING_RESERVATION: ActiveReservation = {
 };
 
 interface StartScreenProps {
+  remainingEntries?: number;
+  totalEntries?: number;
+  upcomingReservation?: ActiveReservation;
   onSelectSport?: (sportId: string) => void;
 }
 
 /**
- * Student Start Screen matching UI Design page 16 (MAKETA-68):
- * - Light header with greeting & user initials
- * - Segmented monthly entry quota card (FR-26)
- * - 3x2 photographic sport selector grid (UI-02)
- * - Compact next reservation card with quick QR access (UI-02)
- * - 4-tab bottom navigation bar (Acasă, Caută, Rezervări, Profil)
+ * Student Start Screen matching UI Design page 16 (MAKETA-68).
  */
-export default function StartScreen({ onSelectSport }: StartScreenProps) {
+export default function StartScreen({
+  remainingEntries = 3,
+  totalEntries = 4,
+  upcomingReservation = DEFAULT_UPCOMING_RESERVATION,
+  onSelectSport,
+}: StartScreenProps) {
   const [activeTab, setActiveTab] = useState<'home' | 'search' | 'bookings' | 'profile'>('home');
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
-
-  // FR-26: Monthly student entry quota (3 of 4 remaining)
-  const totalEntries = 4;
-  const remainingEntries = 3;
 
   return (
     <div className="min-h-screen bg-[#F5F7FA] flex flex-col justify-between max-w-md mx-auto shadow-xs border-x border-slate-200/70">
@@ -132,7 +131,6 @@ export default function StartScreen({ onSelectSport }: StartScreenProps) {
             </span>
           </div>
 
-          {/* 4 segmented bars matching UI Design page 16 */}
           <div
             className="grid grid-cols-4 gap-2"
             role="progressbar"
@@ -184,7 +182,6 @@ export default function StartScreen({ onSelectSport }: StartScreenProps) {
                     />
                   )}
 
-                  {/* Bottom dark gradient for AA contrast on white label (UI-04) */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
 
                   <span className="absolute bottom-2.5 left-3 right-2 text-white font-bold text-sm leading-tight drop-shadow-xs">
@@ -197,10 +194,10 @@ export default function StartScreen({ onSelectSport }: StartScreenProps) {
         </section>
 
         {/* UI-02: Next reservation card with quick QR pass */}
-        <QrTicketCard reservation={UPCOMING_RESERVATION} />
+        <QrTicketCard reservation={upcomingReservation} />
       </div>
 
-      {/* Bottom Navigation Bar (4 items: Acasă, Caută, Rezervări, Profil) */}
+      {/* Bottom Navigation Bar */}
       <nav
         aria-label="Navigare principală"
         className="bg-white border-t border-slate-200/80 px-2 py-1.5 grid grid-cols-4 shrink-0"
