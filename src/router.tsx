@@ -62,6 +62,7 @@ function StudentFlowPage() {
 const adminPages: RouteObject[] = [
   { index: true, lazy: async () => ({ Component: (await import('@/features/admin/dashboard/DashboardPage')).default }) },
   { path: 'resources', lazy: async () => ({ Component: (await import('@/features/admin/resources/ResourcesPage')).default }) },
+  { path: 'blocks', lazy: async () => ({ Component: (await import('@/features/admin/blocks/BlocksPage')).default }) },
 ];
 
 export const router = createBrowserRouter([
