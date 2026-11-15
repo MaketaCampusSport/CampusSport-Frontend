@@ -18,7 +18,8 @@ import ReactDOM from 'react-dom/client';
 import App from './app/App';
 
 async function enableMocking() {
-  if (!import.meta.env.DEV) return;
+  const { USE_MOCKS } = await import('./api/config');
+  if (!import.meta.env.DEV || !USE_MOCKS) return;
   const { startMockWorker } = await import('./mocks/browser');
   return startMockWorker();
 }

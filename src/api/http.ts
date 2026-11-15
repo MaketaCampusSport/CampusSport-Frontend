@@ -25,6 +25,17 @@ interface RequestOptions {
   signal?: AbortSignal;
 }
 
+let accessToken: string | null =
+  import.meta.env.DEV && import.meta.env.VITE_DEV_TOKEN ? String(import.meta.env.VITE_DEV_TOKEN) : null;
+
+export function setAccessToken(token: string | null): void {
+  accessToken = token;
+}
+
+export function getAccessToken(): string | null {
+  return accessToken;
+}
+
 let unauthorizedHandler: (() => void) | null = null;
 
 /** Înregistrat de aplicație: ce se întâmplă când serverul răspunde 401 (sesiune expirată). */
@@ -40,10 +51,10 @@ function buildUrl(path: string, query?: Query): string {
     }
   }
   const qs = params.toString();
-  return `${API_BASE}${path}${qs ? `?${qs}` : ''}`;
+  return `${API_BASE}${path}${qs ? `?\${qs}` : ''}`;
 }
 
-/** Erorile serverului au mesaje în română și engleză (SDD 6.1) – alegem limba curentă. */
+/** Erorile serverului au message_ro și message_en – alegem limba curentă (cu fallback pentru MSW). */
 async function toApiError(res: Response): Promise<ApiError> {
   let code: string | undefined;
   let message = res.statusText || `HTTP ${res.status}`;
@@ -52,13 +63,19 @@ async function toApiError(res: Response): Promise<ApiError> {
     const data = (await res.json()) as {
       code?: string;
       message?: string | { ro?: string; en?: string };
+      message_ro?: string;
+      message_en?: string;
       details?: unknown;
     };
     code = data.code;
     details = data.details;
-    if (typeof data.message === 'string') message = data.message;
-    else if (data.message) {
-      const lang = i18n.language?.startsWith('en') ? 'en' : 'ro';
+    const lang = i18n.language?.startsWith('en') ? 'en' : 'ro';
+
+    if (data.message_ro || data.message_en) {
+      message = (lang === 'en' ? data.message_en : data.message_ro) ?? data.message_ro ?? data.message_en ?? message;
+    } else if (typeof data.message === 'string') {
+      message = data.message;
+    } else if (data.message) {
       message = data.message[lang] ?? data.message.ro ?? data.message.en ?? message;
     }
   } catch {
@@ -67,11 +84,41 @@ async function toApiError(res: Response): Promise<ApiError> {
   return new ApiError(res.status, message, code, details);
 }
 
-async function send(method: string, path: string, opts: RequestOptions = {}): Promise<Response> {
+let refreshPromise: Promise<boolean> | null = null;
+
+async function tryRefreshToken(): Promise<boolean> {
+  if (refreshPromise) return refreshPromise;
+  refreshPromise = (async () => {
+    try {
+      const res = await fetch(buildUrl('/auth/refresh'), {
+        method: 'POST',
+        headers: { Accept: 'application/json' },
+        credentials: 'include',
+      });
+      if (!res.ok) return false;
+      const data = (await res.json()) as { access_token?: string; accessToken?: string; token?: string };
+      const nextToken = data.access_token ?? data.accessToken ?? data.token ?? null;
+      if (!nextToken) return false;
+      setAccessToken(nextToken);
+      return true;
+    } catch {
+      return false;
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+  return refreshPromise;
+}
+
+async function send(method: string, path: string, opts: RequestOptions = {}, canRetry = true): Promise<Response> {
   const headers: Record<string, string> = {
     Accept: 'application/json',
     'Accept-Language': i18n.language?.startsWith('en') ? 'en' : 'ro',
   };
+  if (accessToken) {
+    headers.Authorization = `Bearer ${accessToken}`;
+  }
+
   let body: BodyInit | undefined;
   if (opts.form) {
     body = opts.form;
@@ -87,7 +134,6 @@ async function send(method: string, path: string, opts: RequestOptions = {}): Pr
       headers,
       body,
       signal: opts.signal,
-      // JWT-ul stă într-un cookie HttpOnly / Secure / SameSite=Strict (SDD 8.1).
       credentials: 'include',
     });
   } catch (cause) {
@@ -95,8 +141,18 @@ async function send(method: string, path: string, opts: RequestOptions = {}): Pr
     throw new ApiError(0, i18n.t('errors.network'), 'NETWORK');
   }
 
+  if (res.status === 401 && canRetry && !path.startsWith('/auth/')) {
+    const refreshed = await tryRefreshToken();
+    if (refreshed) {
+      return send(method, path, opts, false);
+    }
+  }
+
   if (!res.ok) {
-    if (res.status === 401) unauthorizedHandler?.();
+    if (res.status === 401) {
+      setAccessToken(null);
+      unauthorizedHandler?.();
+    }
     throw await toApiError(res);
   }
   return res;

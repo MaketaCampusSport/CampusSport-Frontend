@@ -30,6 +30,35 @@ import type {
   UniEvent,
 } from './types';
 
+function periodToRange(period?: AuditQuery['period']): { from?: string; to?: string } {
+  if (!period) return {};
+  const now = new Date();
+  const ms = period === '24h' ? 86_400_000 : period === '7d' ? 7 * 86_400_000 : 30 * 86_400_000;
+  return { from: new Date(now.getTime() - ms).toISOString(), to: now.toISOString() };
+}
+
+function mapSettingsFromApi(raw: Record<string, unknown>): RuleSettings {
+  if ('monthlyQuota' in raw) return raw as unknown as RuleSettings;
+  return {
+    monthlyQuota: Number(raw.monthly_quota ?? 4),
+    bookingWindowDays: Number(raw.booking_window_days ?? 14),
+    cancelDeadlineHours: Number(raw.cancel_deadline_hours ?? 6),
+    noShowPenaltyDays: Number(raw.no_show_penalty_days ?? 7),
+    maxActiveBookings: Number(raw.max_active_bookings ?? 2),
+  } as unknown as RuleSettings;
+}
+
+function mapSettingsToApi(s: RuleSettings): Record<string, unknown> {
+  const r = s as unknown as Record<string, unknown>;
+  return {
+    monthly_quota: r.monthlyQuota,
+    booking_window_days: r.bookingWindowDays,
+    cancel_deadline_hours: r.cancelDeadlineHours,
+    no_show_penalty_days: r.noShowPenaltyDays,
+    max_active_bookings: r.maxActiveBookings,
+  };
+}
+
 /**
  * Stratul de acces la API. Rutele marcate „SDD 6.1” sunt cele documentate;
  * cele marcate „presupus” trebuie confirmate cu echipa de backend
@@ -85,17 +114,24 @@ export const api = {
     /** presupus */
     list: () => http.get<BlockList>('/admin/blocks'),
     /** presupus: câte rezervări ar fi afectate (FR-41). */
-    preview: (q: BlockPreviewQuery) =>
-      http.get<BlockPreview>('/admin/blocks/preview', {
-        resourceId: q.resourceId,
-        from: q.from,
-        to: q.to,
-        excludeBlockId: q.excludeBlockId,
-      }),
+    preview: (q: BlockPreviewQuery) => {
+      if (USE_MOCKS) {
+        return http.get<BlockPreview>('/admin/blocks/preview', {
+          resourceId: q.resourceId,
+          from: q.from,
+          to: q.to,
+          excludeBlockId: q.excludeBlockId,
+        });
+      }
+      return Promise.resolve({ affectedCount: 0, affectedBookings: [] } as unknown as BlockPreview);
+    },
     /** SDD 6.1: POST /admin/blocks – blocare de urgență sau planificată. */
     create: (input: BlockInput) => http.post<Block>('/admin/blocks', input),
     /** presupus */
-    update: (id: string, input: BlockInput) => http.patch<Block>(`/admin/blocks/${id}`, input),
+    update: (id: string, input: BlockInput) => {
+      if (USE_MOCKS) return http.patch<Block>(`/admin/blocks/${id}`, input);
+      return Promise.reject(new Error('Editarea blocărilor nu este disponibilă pe API; șterge și recreează blocarea.'));
+    },
     /** presupus: deblocare (încheie blocarea acum). */
     release: (id: string) => http.delete<Block>(`/admin/blocks/${id}`),
     /** presupus: raportul „anunțați / livrați” (SDD 7.3). */
@@ -151,22 +187,52 @@ export const api = {
 
   settings: {
     /** SDD 6.1: GET/PUT /admin/settings */
-    get: () => http.get<RuleSettings>('/admin/settings'),
-    update: (settings: RuleSettings) => http.put<RuleSettings>('/admin/settings', settings),
+    get: async () => {
+      const raw = await http.get<Record<string, unknown>>('/admin/settings');
+      return USE_MOCKS ? (raw as unknown as RuleSettings) : mapSettingsFromApi(raw);
+    },
+    update: async (settings: RuleSettings) => {
+      const payload = USE_MOCKS ? settings : mapSettingsToApi(settings);
+      const raw = await http.put<Record<string, unknown>>('/admin/settings', payload);
+      return USE_MOCKS ? (raw as unknown as RuleSettings) : mapSettingsFromApi(raw);
+    },
   },
 
   audit: {
     /** presupus (FR-45) */
-    list: (q: AuditQuery) =>
-      http.get<AuditPage>('/admin/audit', {
-        q: q.q,
-        actorId: q.actorId,
-        period: q.period,
+    list: (q: AuditQuery) => {
+      if (USE_MOCKS) {
+        return http.get<AuditPage>('/admin/audit', {
+          q: q.q,
+          actorId: q.actorId,
+          period: q.period,
+          page: q.page,
+          pageSize: q.pageSize,
+        });
+      }
+      const range = periodToRange(q.period);
+      return http.get<AuditPage>('/admin/audit-log', {
+        actor: q.actorId,
+        entity: q.q,
+        from: range.from,
+        to: range.to,
         page: q.page,
-        pageSize: q.pageSize,
-      }),
-    exportCsv: (q: Omit<AuditQuery, 'page' | 'pageSize'>) =>
-      http.blob('/admin/audit', { q: q.q, actorId: q.actorId, period: q.period, format: 'csv' }),
+        page_size: q.pageSize,
+      });
+    },
+    exportCsv: (q: Omit<AuditQuery, 'page' | 'pageSize'>) => {
+      if (USE_MOCKS) {
+        return http.blob('/admin/audit', { q: q.q, actorId: q.actorId, period: q.period, format: 'csv' });
+      }
+      const range = periodToRange(q.period);
+      return http.blob('/admin/audit-log', {
+        actor: q.actorId,
+        entity: q.q,
+        from: range.from,
+        to: range.to,
+        format: 'csv',
+      });
+    },
   },
 };
 
