@@ -29,5 +29,16 @@ export default defineConfig(({ mode }) => {
       target: ['es2022', 'safari16', 'chrome100', 'firefox100'],
       sourcemap: true,
     },
+    test: {
+      environment: 'jsdom',
+      globals: true,
+      css: false,
+      setupFiles: ['./src/test/setup.ts'],
+      env: {
+        VITE_API_BASE_URL: 'http://localhost/api/v1',
+        VITE_USE_MOCKS: 'false',
+        VITE_MOCK_LATENCY: '0',
+      },
+    },
   };
 });
