@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import AdminDashboard from './pages/AdminDashboard';
-import AvailabilityScreen from './features/user/booking/AvailabilityScreen';
-import BookingConfirmScreen from './features/user/booking/BookingConfirmScreen';
-import StartScreen, { DEFAULT_UPCOMING_RESERVATION } from './features/user/home/StartScreen';
-import type { SelectedSlotSummary } from './features/user/booking/availabilityMockData';
-import type { ActiveReservation } from './features/user/components/QrTicketCard'
+import AdminDashboard from '../pages/AdminDashboard';
+import AvailabilityScreen from '../features/user/booking/AvailabilityScreen';
+import BookingConfirmScreen from '../features/user/booking/BookingConfirmScreen';
+import StartScreen, { DEFAULT_UPCOMING_RESERVATION } from '../features/user/home/StartScreen';
+import type { SelectedSlotSummary } from '../features/user/booking/availabilityMockData';
+import type { ActiveReservation } from '../features/user/components/QrTicketCard'
 
 function App() {
   const [roleView, setRoleView] = useState<'student' | 'admin'>('student');
