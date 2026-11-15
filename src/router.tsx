@@ -60,7 +60,15 @@ function StudentFlowPage() {
 }
 
 const adminPages: RouteObject[] = [
-  // Se decomentează pe rând la pașii 6.2 – 6.9
+  { index: true, lazy: async () => ({ Component: (await import('@/features/admin/dashboard/DashboardPage')).default }) },
+  { path: 'resources', lazy: async () => ({ Component: (await import('@/features/admin/resources/ResourcesPage')).default }) },
+  { path: 'blocks', lazy: async () => ({ Component: (await import('@/features/admin/blocks/BlocksPage')).default }) },
+  { path: 'schedule', lazy: async () => ({ Component: (await import('@/features/admin/schedule/SchedulePage')).default }) },
+{ path: 'events', lazy: async () => ({ Component: (await import('@/features/admin/events/EventsPage')).default }) },
+{ path: 'rules', lazy: async () => ({ Component: (await import('@/features/admin/rules/RulesPage')).default }) },
+{ path: 'audit', lazy: async () => ({ Component: (await import('@/features/admin/audit/AuditPage')).default }) },
+{ path: 'announcements', lazy: async () => ({ Component: (await import('@/features/admin/announcements/AnnouncementsPage')).default }) },
+{ path: 'reports', lazy: async () => ({ Component: (await import('@/features/admin/reports/ReportsPage')).default }) },
 ];
 
 export const router = createBrowserRouter([
