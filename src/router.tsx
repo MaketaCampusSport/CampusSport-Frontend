@@ -60,7 +60,7 @@ function StudentFlowPage() {
 }
 
 const adminPages: RouteObject[] = [
-  // Se decomentează pe rând la pașii 6.2 – 6.9
+  { index: true, lazy: async () => ({ Component: (await import('@/features/admin/dashboard/DashboardPage')).default }) },
 ];
 
 export const router = createBrowserRouter([
