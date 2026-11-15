@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Calendar, Home, Search, User } from 'lucide-react';
-import QrTicketCard, { ActiveReservation } from '../components/QrTicketCard';
+import type { ActiveReservation } from '../components/QrTicketCard';
 
 interface SportCardItem {
   id: string;

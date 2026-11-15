@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { ChevronLeft } from 'lucide-react';
-import {
+import type {
   AVAILABLE_DAYS,
   SelectedSlotSummary,
   SPORT_LABELS,
