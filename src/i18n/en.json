@@ -60,6 +60,28 @@
       "remainingOfTotal": "of {{total}} entries left",
       "remainingProgressAria": "{{remaining}} of {{total}} entries left",
       "chooseSport": "Choose a sport"
+    },
+    "availability": {
+      "stepTitle": "01/03 COURT + TIME",
+      "backAria": "Back to sport selection",
+      "selectDayAria": "Choose day",
+      "chooseCourtAndTime": "Choose court and time",
+      "courtCount_one": "{{count}} court",
+      "courtCount_other": "{{count}} courts",
+      "emptyTitle": "No courts available",
+      "emptyBody": "There are no active resources for {{sport}} on this day.",
+      "showMore": "More times",
+      "showLess": "Show less",
+      "slotsAria": "Time slots for {{name}}",
+      "slot": {
+        "selected": "Selected ✓",
+        "free": "Free",
+        "myBooking": "My booking",
+        "peClass": "PE class",
+        "occupied": "Occupied"
+      },
+      "selectHint": "Select a free time slot to continue",
+      "continue": "Continue"
     }
   },
   "login": {

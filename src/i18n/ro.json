@@ -60,6 +60,29 @@
       "remainingOfTotal": "din {{total}} intrări rămase",
       "remainingProgressAria": "{{remaining}} din {{total}} intrări rămase",
       "chooseSport": "Alege sportul"
+    },
+    "availability": {
+      "stepTitle": "01/03 TEREN + ORĂ",
+      "backAria": "Înapoi la alegerea sportului",
+      "selectDayAria": "Alege ziua",
+      "chooseCourtAndTime": "Alege terenul și ora",
+      "courtCount_one": "{{count}} teren",
+      "courtCount_few": "{{count}} terenuri",
+      "courtCount_other": "{{count}} de terenuri",
+      "emptyTitle": "Niciun teren disponibil",
+      "emptyBody": "Nu există resurse active pentru {{sport}} în această zi.",
+      "showMore": "Mai multe ore",
+      "showLess": "Restrânge",
+      "slotsAria": "Sloturi orare pentru {{name}}",
+      "slot": {
+        "selected": "Selectat ✓",
+        "free": "Liber",
+        "myBooking": "Rezervarea mea",
+        "peClass": "Curs EF",
+        "occupied": "Ocupat"
+      },
+      "selectHint": "Selectează o oră liberă pentru a continua",
+      "continue": "Continuă"
     }
   },
   "login": {

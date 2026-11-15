@@ -1,13 +1,19 @@
 import { useMemo, useState } from 'react';
+import { addDays, format } from 'date-fns';
+import { enUS, ro } from 'date-fns/locale';
 import { ChevronLeft } from 'lucide-react';
-import type {
-  AVAILABLE_DAYS,
-  SelectedSlotSummary,
-  SPORT_LABELS,
-  SPORT_RESOURCES,
-  SlotStatus,
-  TimeSlotItem,
-} from './availabilityMockData';
+import { useTranslation } from 'react-i18next';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { ErrorState, Skeleton } from '@/components/ui/feedback';
+import { cn } from '@/lib/cn';
+import {
+  toSlotItem,
+  type SelectedSlotSummary,
+  type SlotStatus,
+  type TimeSlotItem,
+} from './mapAvailability';
+import { useAvailability, useSports } from './useAvailability';
 
 interface AvailabilityScreenProps {
   sportId: string;
@@ -15,55 +21,72 @@ interface AvailabilityScreenProps {
   onContinue?: (selection: SelectedSlotSummary) => void;
 }
 
-type EnvironmentFilter = 'Toate' | 'Interior' | 'Exterior';
-
-/**
- * Availability Screen (MAKETA-69 / UI-03):
- * Matches UI Design page 17 and component states on page 37:
- * - Step header "01/03 TEREN + ORĂ" with back navigation & environment filters
- * - Horizontal scrollable day strip
- * - Resource cards with horizontal scrollable 2-row slot grid & "Mai multe ore" toggle
- * - Sticky bottom selection summary + "Continuă" CTA
- */
 export default function AvailabilityScreen({
   sportId,
   onBack,
   onContinue,
 }: AvailabilityScreenProps) {
-  const [selectedDayId, setSelectedDayId] = useState<string>(AVAILABLE_DAYS[0].id);
-  const [envFilter, setEnvFilter] = useState<EnvironmentFilter>('Toate');
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language.startsWith('en') ? enUS : ro;
+  const langKey = i18n.language.startsWith('en') ? 'en' : 'ro';
+
+  // 1. Generăm cele 7 zile începând de azi cu date-fns
+  const days = useMemo(() => {
+    const today = new Date();
+    return Array.from({ length: 7 }, (_, offset) => {
+      const date = addDays(today, offset);
+      return {
+        id: format(date, 'yyyy-MM-dd'),
+        dayShort: format(date, 'EEE', { locale: dateLocale }).replace('.', '').toUpperCase(),
+        dayNumber: format(date, 'd'),
+        fullLabel: format(date, 'EEEE, d MMM', { locale: dateLocale }),
+      };
+    });
+  }, [dateLocale]);
+
+  const [selectedDayId, setSelectedDayId] = useState<string>(() => days[0].id);
   const [selectedSlotKey, setSelectedSlotKey] = useState<string | null>(null);
   const [expandedResources, setExpandedResources] = useState<Record<string, boolean>>({});
 
-  const sportName = SPORT_LABELS[sportId] ?? 'Sport';
+  // 4 & 7. Date din API via TanStack Query
+  const { data: sports } = useSports();
+  const { data, isLoading, isError, refetch } = useAvailability(sportId, selectedDayId);
 
-  const filteredResources = useMemo(() => {
-    return SPORT_RESOURCES.filter((res) => {
-      if (res.sportId !== sportId) return false;
-      if (envFilter !== 'Toate' && res.environment !== envFilter) return false;
-      return true;
-    });
-  }, [sportId, envFilter]);
+  const sportName = useMemo(() => {
+    const found = sports?.find((s) => s.id === sportId);
+    if (!found) return sportId;
+    return typeof found.name === 'string' ? found.name : found.name[langKey] ?? found.name.ro;
+  }, [sports, sportId, langKey]);
+
+  const resources = useMemo(() => {
+    return (data?.resources ?? []).map((res) => ({
+      id: res.resource_id,
+      name: res.resource_name,
+      // Punctul 8: type dacă există în răspuns, altfel numele sportului
+      typeLabel: (res as { type?: string }).type ?? sportName,
+      slots: res.slots.map((slot) => toSlotItem(res.resource_id, slot)),
+    }));
+  }, [data, sportName]);
 
   const activeDay = useMemo(
-    () => AVAILABLE_DAYS.find((d) => d.id === selectedDayId) ?? AVAILABLE_DAYS[0],
-    [selectedDayId]
+    () => days.find((d) => d.id === selectedDayId) ?? days[0],
+    [days, selectedDayId],
   );
 
-  // Resolve currently selected slot details for the sticky bottom bar
   const selectedSummary = useMemo<SelectedSlotSummary | null>(() => {
     if (!selectedSlotKey) return null;
 
-    for (const resource of filteredResources) {
-      const slots = resource.slotsByDay[selectedDayId] ?? [];
-      const found = slots.find((slot) => `${resource.id}::${slot.id}` === selectedSlotKey);
+    for (const resource of resources) {
+      const found = resource.slots.find(
+        (slot) => `${resource.id}::${slot.id}` === selectedSlotKey,
+      );
       if (found && found.status === 'free') {
         return {
           sportId,
           sportName,
           resourceId: resource.id,
           resourceName: resource.name,
-          location: resource.location,
+          location: resource.typeLabel,
           dayId: activeDay.id,
           dayLabel: activeDay.fullLabel,
           slotId: found.id,
@@ -73,7 +96,7 @@ export default function AvailabilityScreen({
       }
     }
     return null;
-  }, [selectedSlotKey, filteredResources, selectedDayId, sportId, sportName, activeDay]);
+  }, [selectedSlotKey, resources, sportId, sportName, activeDay]);
 
   const handleDayChange = (dayId: string) => {
     setSelectedDayId(dayId);
@@ -90,10 +113,9 @@ export default function AvailabilityScreen({
   const getSlotStyles = (status: SlotStatus, isSelected: boolean) => {
     if (isSelected) {
       return {
-        container:
-          'bg-brandYellow border-2 border-brandDark text-brandDark shadow-xs',
-        label: 'Selectat ✓',
-        labelClass: 'text-brandDark font-bold',
+        container: 'bg-sun border-2 border-ink text-onsun shadow-card',
+        label: t('user.availability.slot.selected'),
+        labelClass: 'text-onsun font-bold',
         disabled: false,
       };
     }
@@ -101,101 +123,71 @@ export default function AvailabilityScreen({
     switch (status) {
       case 'free':
         return {
-          container:
-            'bg-white border border-slate-200 hover:border-brandBlue text-brandDark',
-          label: 'Liber',
-          labelClass: 'text-slate-500 font-medium',
+          container: 'bg-surface border border-line hover:border-brand text-ink',
+          label: t('user.availability.slot.free'),
+          labelClass: 'text-muted font-medium',
           disabled: false,
         };
       case 'my_booking':
         return {
-          container: 'bg-brandBlue border border-brandBlue text-white',
-          label: 'Rezervarea mea',
+          container: 'bg-brand border border-brand text-white',
+          label: t('user.availability.slot.myBooking'),
           labelClass: 'text-white/90 font-semibold',
           disabled: true,
         };
       case 'pe_class':
         return {
-          container: 'bg-amber-50 border border-amber-200/80 text-amber-900',
-          label: 'Curs EF',
-          labelClass: 'text-amber-700 font-semibold',
+          container: 'bg-warn-soft border border-warn-ink/20 text-warn-ink',
+          label: t('user.availability.slot.peClass'),
+          labelClass: 'text-warn-ink font-semibold',
           disabled: true,
         };
       case 'occupied':
       default:
         return {
-          container: 'bg-slate-100 border border-transparent text-slate-400',
-          label: 'Ocupat',
-          labelClass: 'text-slate-400 font-medium',
+          container: 'bg-subtle border border-transparent text-muted/60',
+          label: t('user.availability.slot.occupied'),
+          labelClass: 'text-muted/60 font-medium',
           disabled: true,
         };
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F7FA] flex flex-col justify-between max-w-md mx-auto shadow-xs border-x border-slate-200/70">
+    <div className="mx-auto flex min-h-screen max-w-md flex-col justify-between border-x border-line bg-subtle shadow-card">
       {/* Top Header & Day Strip */}
-      <header className="bg-white border-b border-slate-200/80 pt-4 pb-3 px-4 sticky top-0 z-20">
-        {/* Step Progress Row */}
+      <header className="sticky top-0 z-20 border-b border-line bg-surface px-4 pt-4 pb-3">
         <div className="flex items-center justify-between gap-2">
           <button
             type="button"
             onClick={onBack}
-            aria-label="Înapoi la alegerea sportului"
-            className="w-11 h-11 min-w-[44px] min-h-[44px] -ml-2 rounded-full hover:bg-slate-100 flex items-center justify-center text-brandDark transition-colors"
+            aria-label={t('user.availability.backAria')}
+            className="-ml-2 flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-full text-ink transition-colors hover:bg-subtle"
           >
             <ChevronLeft size={22} strokeWidth={2.5} />
           </button>
 
-          <span className="text-[11px] font-bold uppercase tracking-widest text-brandBlue">
-            01/03 TEREN + ORĂ
+          <span className="text-[11px] font-bold uppercase tracking-widest text-brand-text">
+            {t('user.availability.stepTitle')}
           </span>
 
-          <span className="text-xs font-bold text-slate-400">CampusSport</span>
+          <span className="text-xs font-bold text-muted">CampusSport</span>
         </div>
 
-        {/* Sport Title + Environment Filter Pills */}
-        <div className="flex items-center justify-between gap-2 mt-1">
-          <h1 className="font-condensed text-3xl font-bold uppercase tracking-wide text-brandDark">
+        {/* Punctul 8: Filtrul Interior/Exterior este ascuns până la decizia backend-ului */}
+        <div className="mt-1 flex items-center justify-between gap-2">
+          <h1 className="heading text-3xl uppercase tracking-wide text-ink">
             {sportName}
           </h1>
-
-          <div
-            className="flex items-center gap-1.5"
-            role="group"
-            aria-label="Filtrare după tipul spațiului"
-          >
-            {(['Toate', 'Interior', 'Exterior'] as EnvironmentFilter[]).map((filter) => {
-              const isActive = envFilter === filter;
-              return (
-                <button
-                  key={filter}
-                  type="button"
-                  onClick={() => {
-                    setEnvFilter(filter);
-                    setSelectedSlotKey(null);
-                  }}
-                  aria-pressed={isActive}
-                  className={`min-h-[36px] px-3 py-1.5 rounded-full text-xs font-bold transition-colors ${
-                    isActive
-                      ? 'bg-brandDark text-white'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  }`}
-                >
-                  {filter}
-                </button>
-              );
-            })}
-          </div>
         </div>
 
-        {/* Horizontal Scrollable Day Selector Strip (UI-03) */}
+        {/* Horizontal Scrollable 7-Day Selector Strip */}
         <div
-          className="flex items-center gap-2 overflow-x-auto pt-3 pb-1 -mx-1 px-1 no-scrollbar"
+          className="-mx-1 flex items-center gap-2 overflow-x-auto px-1 pt-3 pb-1"
           role="tablist"
-          aria-label="Alege ziua"
+          aria-label={t('user.availability.selectDayAria')}
         >
-          {AVAILABLE_DAYS.map((day) => {
+          {days.map((day) => {
             const isSelected = day.id === selectedDayId;
             return (
               <button
@@ -204,20 +196,22 @@ export default function AvailabilityScreen({
                 role="tab"
                 aria-selected={isSelected}
                 onClick={() => handleDayChange(day.id)}
-                className={`min-w-[58px] min-h-[60px] rounded-2xl px-2.5 py-2 flex flex-col items-center justify-center shrink-0 transition-all ${
+                className={cn(
+                  'flex min-h-[60px] min-w-[58px] shrink-0 flex-col items-center justify-center rounded-2xl px-2.5 py-2 transition-all',
                   isSelected
-                    ? 'bg-brandBlue text-white shadow-xs'
-                    : 'bg-slate-100/80 text-brandDark hover:bg-slate-200/70'
-                }`}
+                    ? 'bg-brand text-white shadow-card'
+                    : 'bg-subtle text-ink hover:bg-line/60',
+                )}
               >
                 <span
-                  className={`text-[10px] font-bold uppercase tracking-wider ${
-                    isSelected ? 'text-white/90' : 'text-slate-400'
-                  }`}
+                  className={cn(
+                    'text-[10px] font-bold uppercase tracking-wider',
+                    isSelected ? 'text-white/90' : 'text-muted',
+                  )}
                 >
                   {day.dayShort}
                 </span>
-                <span className="font-condensed text-xl font-bold leading-tight mt-0.5">
+                <span className="heading mt-0.5 text-xl leading-tight">
                   {day.dayNumber}
                 </span>
               </button>
@@ -226,70 +220,89 @@ export default function AvailabilityScreen({
         </div>
       </header>
 
-      {/* Main Content: Resource Cards + Horizontal Scrollable Slot Grids */}
-      <main className="flex-1 px-4 py-4 space-y-4 overflow-y-auto">
+      {/* Main Content */}
+      <main className="flex-1 space-y-4 overflow-y-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xs font-extrabold uppercase tracking-wider text-slate-500">
-            ALEGE TERENUL ȘI ORA
+          <h2 className="text-xs font-extrabold uppercase tracking-wider text-muted">
+            {t('user.availability.chooseCourtAndTime')}
           </h2>
-          <span className="text-xs font-semibold text-slate-500">
-            {filteredResources.length}{' '}
-            {filteredResources.length === 1 ? 'teren' : 'terenuri'}
-          </span>
+          {!isLoading && !isError && (
+            <span className="text-xs font-semibold text-muted">
+              {t('user.availability.courtCount', { count: resources.length })}
+            </span>
+          )}
         </div>
 
-        {filteredResources.length === 0 ? (
-          <div className="bg-white rounded-2xl p-6 text-center border border-slate-100">
-            <p className="text-sm font-bold text-brandDark">
-              Niciun teren disponibil pentru filtrul „{envFilter}”
-            </p>
-            <p className="text-xs text-slate-500 mt-1">
-              Schimbă filtrul de sus în „Toate” pentru a vedea toate resursele pentru{' '}
-              {sportName}.
-            </p>
+        {/* Punctul 6: Stare de încărcare (schelet pentru carduri) */}
+        {isLoading ? (
+          <div className="space-y-4">
+            {[1, 2].map((n) => (
+              <Card key={n} className="space-y-3 border border-line/60 p-4">
+                <Skeleton className="h-5 w-40 rounded-lg" />
+                <Skeleton className="h-3.5 w-24 rounded-lg" />
+                <div className="grid grid-cols-3 gap-2 pt-1">
+                  <Skeleton className="h-[54px] rounded-xl" />
+                  <Skeleton className="h-[54px] rounded-xl" />
+                  <Skeleton className="h-[54px] rounded-xl" />
+                </div>
+              </Card>
+            ))}
           </div>
+        ) : isError ? (
+          /* Punctul 6: Stare de eroare cu buton Reîncearcă */
+          <Card className="border border-line/60">
+            <ErrorState onRetry={() => void refetch()} className="py-10" />
+          </Card>
+        ) : resources.length === 0 ? (
+          <Card className="border border-line/60 p-6 text-center">
+            <p className="text-sm font-bold text-ink">
+              {t('user.availability.emptyTitle')}
+            </p>
+            <p className="mt-1 text-xs text-muted">
+              {t('user.availability.emptyBody', { sport: sportName })}
+            </p>
+          </Card>
         ) : (
-          filteredResources.map((resource) => {
-            const allSlots = resource.slotsByDay[selectedDayId] ?? [];
+          resources.map((resource) => {
             const isExpanded = Boolean(expandedResources[resource.id]);
             const visibleSlots: TimeSlotItem[] = isExpanded
-              ? allSlots
-              : allSlots.slice(0, 6);
+              ? resource.slots
+              : resource.slots.slice(0, 6);
 
             return (
-              <section
+              <Card
                 key={resource.id}
                 aria-label={resource.name}
-                className="bg-white rounded-2xl p-4 shadow-xs border border-slate-100"
+                className="border border-line/60 p-4"
               >
-                {/* Resource Card Header */}
-                <div className="flex items-start justify-between gap-2 mb-3">
+                <div className="mb-3 flex items-start justify-between gap-2">
                   <div>
-                    <h3 className="text-base font-bold text-brandDark leading-tight">
+                    <h3 className="text-base font-bold leading-tight text-ink">
                       {resource.name}
                     </h3>
-                    <p className="text-xs font-medium text-slate-500 mt-0.5">
-                      {resource.location} · {resource.environment} ·{' '}
-                      {resource.surfaceOrDetails}
+                    <p className="mt-0.5 text-xs font-medium capitalize text-muted">
+                      {resource.typeLabel}
                     </p>
                   </div>
 
-                  {allSlots.length > 6 && (
+                  {resource.slots.length > 6 && (
                     <button
                       type="button"
                       onClick={() => handleToggleExpand(resource.id)}
-                      className="min-h-[36px] text-xs font-bold text-brandBlue hover:underline shrink-0 px-1"
+                      className="min-h-[36px] shrink-0 px-1 text-xs font-bold text-brand-text hover:underline"
                     >
-                      {isExpanded ? 'Restrânge' : 'Mai multe ore'}
+                      {isExpanded
+                        ? t('user.availability.showLess')
+                        : t('user.availability.showMore')}
                     </button>
                   )}
                 </div>
 
-                {/* UI-03: Horizontal Scrollable 2-Row Slot Grid */}
+                {/* Horizontal Scrollable 2-Row Slot Grid */}
                 <div
-                  className="grid grid-rows-2 grid-flow-col auto-cols-[minmax(108px,1fr)] gap-2 overflow-x-auto pb-1"
+                  className="grid grid-flow-col grid-rows-2 auto-cols-[minmax(108px,1fr)] gap-2 overflow-x-auto pb-1"
                   role="group"
-                  aria-label={`Sloturi orare pentru ${resource.name}`}
+                  aria-label={t('user.availability.slotsAria', { name: resource.name })}
                 >
                   {visibleSlots.map((slot) => {
                     const compositeKey = `${resource.id}::${slot.id}`;
@@ -304,68 +317,58 @@ export default function AvailabilityScreen({
                         aria-pressed={isSelected}
                         onClick={() =>
                           setSelectedSlotKey((prev) =>
-                            prev === compositeKey ? null : compositeKey
+                            prev === compositeKey ? null : compositeKey,
                           )
                         }
-                        // UI-05: minimum 44px touch target height
-                        className={`min-h-[54px] rounded-xl px-3 py-2 text-left flex flex-col justify-center transition-all ${
-                          styles.container
-                        } ${
+                        className={cn(
+                          'flex min-h-[54px] flex-col justify-center rounded-xl px-3 py-2 text-left transition-all',
+                          styles.container,
                           styles.disabled
                             ? 'cursor-not-allowed'
-                            : 'active:scale-[0.97] cursor-pointer'
-                        }`}
+                            : 'cursor-pointer active:scale-[0.97]',
+                        )}
                       >
                         <span className="text-sm font-extrabold leading-tight">
                           {slot.time}
                         </span>
-                        <span className={`text-[11px] mt-0.5 ${styles.labelClass}`}>
+                        <span className={cn('mt-0.5 text-[11px]', styles.labelClass)}>
                           {styles.label}
                         </span>
                       </button>
                     );
                   })}
                 </div>
-              </section>
+              </Card>
             );
           })
         )}
       </main>
 
-      {/* Sticky Bottom Summary & Primary CTA (UI Design page 17) */}
-      <footer className="bg-white border-t border-slate-200/80 px-4 py-3.5 shrink-0">
-        <p className="text-center text-xs font-semibold text-slate-600 mb-2.5">
+      {/* Sticky Bottom Summary & Primary CTA (Button variant="accent" size="lg") */}
+      <footer className="shrink-0 border-t border-line bg-surface px-4 py-3.5">
+        <p className="mb-2.5 text-center text-xs font-semibold text-muted">
           {selectedSummary ? (
             <>
-              <span className="text-brandDark font-bold">
+              <span className="font-bold text-ink capitalize">
                 {selectedSummary.dayLabel}
               </span>{' '}
-              ·{' '}
-              <span className="text-brandDark font-bold">
-                {selectedSummary.time}
-              </span>{' '}
-              ·{' '}
-              <span className="text-brandDark font-bold">
-                {selectedSummary.resourceName}
-              </span>
+              · <span className="font-bold text-ink">{selectedSummary.time}</span> ·{' '}
+              <span className="font-bold text-ink">{selectedSummary.resourceName}</span>
             </>
           ) : (
-            'Selectează o oră liberă pentru a continua'
+            t('user.availability.selectHint')
           )}
         </p>
 
-        <button
-          type="button"
+        <Button
+          variant="accent"
+          size="lg"
           disabled={!selectedSummary}
           onClick={() => selectedSummary && onContinue?.(selectedSummary)}
-          className={`w-full min-h-[48px] rounded-2xl font-bold text-[15px] transition-colors ${
-            selectedSummary
-              ? 'bg-brandYellow hover:bg-yellow-400 text-brandDark shadow-xs cursor-pointer'
-              : 'bg-slate-200 text-slate-400 cursor-not-allowed'
-          }`}
+          className="w-full"
         >
-          Continuă
-        </button>
+          {t('user.availability.continue')}
+        </Button>
       </footer>
     </div>
   );
