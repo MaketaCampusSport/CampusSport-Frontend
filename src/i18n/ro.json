@@ -83,6 +83,52 @@
       },
       "selectHint": "Selectează o oră liberă pentru a continua",
       "continue": "Continuă"
+    },
+    "confirm": {
+      "stepConfirm": "02/03 CONFIRMĂ",
+      "title": "Confirmă",
+      "subtitle": "Verifică detaliile rezervării",
+      "backToSlotsAria": "Înapoi la alegerea orei",
+      "detailsAria": "Detalii rezervare",
+      "dateLabel": "Data",
+      "timeLabel": "Ora",
+      "participantsLabel": "Participanți",
+      "participantsHint": "Opțional până la {{max}}",
+      "decreaseParticipantsAria": "Scade numărul de participanți",
+      "increaseParticipantsAria": "Crește numărul de participanți",
+      "policiesAria": "Cotă și reguli",
+      "quotaUsage": "Folosești 1 intrare din cotă",
+      "quotaRemaining": "{{remaining}} din {{total}} rămân",
+      "freeCancelRule": "Anulare gratuită până la 2 h înainte",
+      "checkInRule": "Check-in cu QR între -10 și +15 min ({{window}})",
+      "submit": "Confirmă rezervarea",
+      "submitting": "Se confirmă…",
+      "back": "Înapoi",
+      "errors": {
+        "slotTakenTitle": "Acest interval tocmai a fost ocupat",
+        "slotTakenBody": "Poți intra pe lista de așteptare și te anunțăm imediat dacă se eliberează.",
+        "joinWaitlist": "Intră pe lista de așteptare",
+        "joiningWaitlist": "Se înscrie…",
+        "waitlistJoinedTitle": "Ești pe lista de așteptare",
+        "waitlistJoinedBody": "Vei primi o notificare dacă locul devine disponibil.",
+        "quotaExhaustedTitle": "Cota lunară a fost epuizată",
+        "quotaExhaustedBody": "Ai folosit toate intrările gratuite din această lună."
+      },
+      "success": {
+        "badge": "03/03 REZERVARE CONFIRMATĂ",
+        "headline": "GATA!",
+        "subtitlePrefix": "Te așteptăm",
+        "subtitleAt": "la",
+        "subtitleOn": "pe",
+        "courtCol": "TEREN",
+        "dateCol": "DATA",
+        "timeCol": "ORA",
+        "checkInNote": "Arată codul la intrare · Check-in permis între",
+        "addToCalendar": "Adaugă în calendar",
+        "addedToCalendar": "Adăugat în calendar (.ics)",
+        "done": "Gata",
+        "qrAria": "Cod QR rezervare {{code}}"
+      }
     }
   },
   "login": {

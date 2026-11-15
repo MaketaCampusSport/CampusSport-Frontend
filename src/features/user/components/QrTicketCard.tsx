@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { Calendar, QrCode } from 'lucide-react';
+import QRCode from 'react-qr-code';
 import { Card } from '@/components/ui/Card';
 import { Modal } from '@/components/ui/Modal';
 
 export interface ActiveReservation {
   id: string;
   code: string;
+  qrToken?: string;
   sportName: string;
   resourceName: string;
   locationLabel: string;
@@ -26,25 +28,7 @@ interface QrTicketCardProps {
  */
 export default function QrTicketCard({ reservation }: QrTicketCardProps) {
   const [isQrOpen, setIsQrOpen] = useState(false);
-
-  const renderQrSvg = (sizeClass: string) => (
-    <svg
-      viewBox="0 0 100 100"
-      className={sizeClass}
-      role="img"
-      aria-label={`Cod QR rezervare ${reservation.code}`}
-    >
-      <rect width="100" height="100" rx="6" fill="#FFFFFF" />
-      <path
-        fill="#1A2238"
-        d="M10 10h24v24H10V10zm4 4v16h16V14H14zm4 4h8v8h-8v-8zm48-8h24v24H66V10zm4 4v16h16V14H70zm4 4h8v8h-8v-8zM10 66h24v24H10V66zm4 4v16h16V70H14zm4 4h8v8h-8v-8z"
-      />
-      <path
-        fill="#1A2238"
-        d="M42 12h6v6h-6zm10 0h6v12h-6zm-10 12h6v10h-6zm10 10h6v6h-6zM12 42h12v6H12zm18 0h10v6H30zm16 0h12v6H46zm18 0h8v12h-8zm14 0h10v6H78zM42 54h12v6H42zm-24 2h12v4H18zm54 4h16v6H72zM42 66h6v12h-6zm12 4h10v6H54zm14 6h8v14h-8zm-26 8h16v6H42zm20 0h4v6h-4z"
-      />
-    </svg>
-  );
+  const qrValue = reservation.qrToken ?? reservation.code;
 
   return (
     <>
@@ -116,9 +100,17 @@ export default function QrTicketCard({ reservation }: QrTicketCardProps) {
         </div>
 
         <div className="flex flex-col items-center justify-center py-2">
-          {renderQrSvg('h-48 w-48')}
-          <p className="mt-2 text-sm font-bold text-ink">
-            Cod: {reservation.code}
+          <div className="rounded-2xl bg-white p-3">
+            <QRCode
+              value={qrValue}
+              size={192}
+              fgColor="#1A2238"
+              bgColor="#FFFFFF"
+              aria-label={`Cod QR rezervare ${reservation.code}`}
+            />
+          </div>
+          <p className="mt-2 font-mono text-sm font-bold text-ink">
+            {reservation.code}
           </p>
         </div>
 

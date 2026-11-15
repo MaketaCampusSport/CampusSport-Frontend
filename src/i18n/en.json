@@ -82,6 +82,52 @@
       },
       "selectHint": "Select a free time slot to continue",
       "continue": "Continue"
+    },
+    "confirm": {
+      "stepConfirm": "02/03 CONFIRM",
+      "title": "Confirm",
+      "subtitle": "Review your booking details",
+      "backToSlotsAria": "Back to time selection",
+      "detailsAria": "Booking details",
+      "dateLabel": "Date",
+      "timeLabel": "Time",
+      "participantsLabel": "Participants",
+      "participantsHint": "Optional up to {{max}}",
+      "decreaseParticipantsAria": "Decrease participants",
+      "increaseParticipantsAria": "Increase participants",
+      "policiesAria": "Quota and policies",
+      "quotaUsage": "Uses 1 entry from your quota",
+      "quotaRemaining": "{{remaining}} of {{total}} left",
+      "freeCancelRule": "Free cancellation up to 2 h before",
+      "checkInRule": "QR check-in between -10 and +15 min ({{window}})",
+      "submit": "Confirm booking",
+      "submitting": "Confirming…",
+      "back": "Back",
+      "errors": {
+        "slotTakenTitle": "This slot was just taken",
+        "slotTakenBody": "Join the waitlist and we will notify you if a spot opens up.",
+        "joinWaitlist": "Join waitlist",
+        "joiningWaitlist": "Joining…",
+        "waitlistJoinedTitle": "You're on the waitlist",
+        "waitlistJoinedBody": "We'll notify you as soon as the slot frees up.",
+        "quotaExhaustedTitle": "Monthly quota reached",
+        "quotaExhaustedBody": "You have used all your free entries for this month."
+      },
+      "success": {
+        "badge": "03/03 BOOKING CONFIRMED",
+        "headline": "ALL SET!",
+        "subtitlePrefix": "See you on",
+        "subtitleAt": "at",
+        "subtitleOn": "on",
+        "courtCol": "COURT",
+        "dateCol": "DATE",
+        "timeCol": "TIME",
+        "checkInNote": "Show this code at the entrance · Check-in open",
+        "addToCalendar": "Add to calendar",
+        "addedToCalendar": "Added to calendar (.ics)",
+        "done": "Done",
+        "qrAria": "Booking QR code {{code}}"
+      }
     }
   },
   "login": {
