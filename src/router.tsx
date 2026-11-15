@@ -1,0 +1,91 @@
+import { useState } from 'react';
+import { createBrowserRouter, type RouteObject } from 'react-router';
+import { RequireAdmin } from '@/features/admin/auth/RequireAdmin';
+import AvailabilityScreen from '@/features/user/booking/AvailabilityScreen';
+import BookingConfirmScreen from '@/features/user/booking/BookingConfirmScreen';
+import type { SelectedSlotSummary } from '@/features/user/booking/mapAvailability';
+import type { ActiveReservation } from '@/features/user/components/QrTicketCard';
+import StartScreen, { DEFAULT_UPCOMING_RESERVATION } from '@/features/user/home/StartScreen';
+import { AdminLayout } from './app/layout/AdminLayout';
+import { FullPageSpinner, NotFoundPage, RouteErrorPage } from './app/RouteFallbacks';
+
+function StudentFlowPage() {
+  const [selectedSportId, setSelectedSportId] = useState<string | null>(null);
+  const [pendingBooking, setPendingBooking] = useState<SelectedSlotSummary | null>(null);
+
+  const totalEntries = 4;
+  const [remainingEntries, setRemainingEntries] = useState<number>(3);
+  const [upcomingReservation, setUpcomingReservation] = useState<ActiveReservation>(
+    DEFAULT_UPCOMING_RESERVATION,
+  );
+
+  if (pendingBooking) {
+    return (
+      <BookingConfirmScreen
+        selection={pendingBooking}
+        remainingEntries={remainingEntries}
+        totalEntries={totalEntries}
+        onBack={() => setPendingBooking(null)}
+        onComplete={(createdReservation) => {
+          setUpcomingReservation(createdReservation);
+          setRemainingEntries((prev) => Math.max(0, prev - 1));
+          setPendingBooking(null);
+          setSelectedSportId(null);
+        }}
+      />
+    );
+  }
+
+  if (selectedSportId) {
+    return (
+      <AvailabilityScreen
+        sportId={selectedSportId}
+        onBack={() => setSelectedSportId(null)}
+        onContinue={(selection) => setPendingBooking(selection)}
+      />
+    );
+  }
+
+  return (
+    <StartScreen
+      remainingEntries={remainingEntries}
+      totalEntries={totalEntries}
+      upcomingReservation={upcomingReservation}
+      onSelectSport={(sportId) => {
+        setSelectedSportId(sportId);
+        setPendingBooking(null);
+      }}
+    />
+  );
+}
+
+const adminPages: RouteObject[] = [
+  // Se decomentează pe rând la pașii 6.2 – 6.9
+];
+
+export const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <StudentFlowPage />,
+    errorElement: <RouteErrorPage />,
+  },
+  {
+    path: '/user/*',
+    element: <StudentFlowPage />,
+    errorElement: <RouteErrorPage />,
+  },
+  {
+    path: '/admin/login',
+    HydrateFallback: FullPageSpinner,
+    errorElement: <RouteErrorPage />,
+    lazy: async () => ({ Component: (await import('@/features/admin/auth/LoginPage')).default }),
+  },
+  {
+    path: '/admin',
+    element: <RequireAdmin />,
+    HydrateFallback: FullPageSpinner,
+    errorElement: <RouteErrorPage />,
+    children: [{ element: <AdminLayout />, children: adminPages }],
+  },
+  { path: '*', element: <NotFoundPage /> },
+]);
