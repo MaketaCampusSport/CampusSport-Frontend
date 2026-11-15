@@ -44,7 +44,23 @@
   "user": {
     "placeholderTitle": "User app",
     "placeholderBody": "The mobile app (PWA) for students and teachers goes in src/features/user. For now only the admin panel is available.",
-    "openAdmin": "Open the admin panel"
+    "openAdmin": "Open the admin panel",
+    "nav": {
+      "label": "Main navigation",
+      "home": "Home",
+      "search": "Search",
+      "bookings": "Bookings",
+      "profile": "Profile"
+    },
+    "home": {
+      "greeting": "Hi, {{name}}",
+      "subtitle": "WHAT SPORT ARE YOU PLAYING TODAY?",
+      "myProfile": "My profile",
+      "quotaAria": "Remaining entries this month",
+      "remainingOfTotal": "of {{total}} entries left",
+      "remainingProgressAria": "{{remaining}} of {{total}} entries left",
+      "chooseSport": "Choose a sport"
+    }
   },
   "login": {
     "step1": "Step 1 of 2",

@@ -44,7 +44,23 @@
   "user": {
     "placeholderTitle": "Aplicația pentru utilizatori",
     "placeholderBody": "Aplicația mobilă (PWA) pentru studenți și profesori se adaugă în src/features/user. Momentan este disponibil panoul de administrare.",
-    "openAdmin": "Deschide panoul de administrare"
+    "openAdmin": "Deschide panoul de administrare",
+    "nav": {
+      "label": "Navigare principală",
+      "home": "Acasă",
+      "search": "Caută",
+      "bookings": "Rezervări",
+      "profile": "Profil"
+    },
+    "home": {
+      "greeting": "Salut, {{name}}",
+      "subtitle": "CE SPORT JOCI AZI?",
+      "myProfile": "Profilul meu",
+      "quotaAria": "Intrări rămase în luna curentă",
+      "remainingOfTotal": "din {{total}} intrări rămase",
+      "remainingProgressAria": "{{remaining}} din {{total}} intrări rămase",
+      "chooseSport": "Alege sportul"
+    }
   },
   "login": {
     "step1": "Pasul 1 din 2",
