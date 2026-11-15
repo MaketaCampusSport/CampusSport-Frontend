@@ -16,14 +16,10 @@ export default {
         danger: { DEFAULT: rgb('--c-danger'), strong: rgb('--c-danger-strong'), soft: rgb('--c-danger-soft'), ink: rgb('--c-danger-ink') },
         success: { DEFAULT: rgb('--c-success'), soft: rgb('--c-success-soft'), ink: rgb('--c-success-ink') },
         warn: { soft: rgb('--c-warn-soft'), ink: rgb('--c-warn-ink') },
-        // alias-uri temporare, se șterg la finalul fazei 5
-        brandYellow: rgb('--c-sun'), brandDark: rgb('--c-navy'), brandBlue: rgb('--c-brand'),
-        brandRed: rgb('--c-danger'), brandLightBg: rgb('--c-canvas'),
       },
       fontFamily: {
         sans: ['Barlow', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
         display: ['Barlow Condensed', 'Barlow', 'system-ui', 'sans-serif'],
-        condensed: ['Barlow Condensed', 'Barlow', 'system-ui', 'sans-serif'], // alias temporar
       },
       borderRadius: { '4xl': '2rem' },
       boxShadow: {
