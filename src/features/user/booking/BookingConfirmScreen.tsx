@@ -9,7 +9,7 @@ import {
   ShieldCheck,
   Users,
 } from 'lucide-react';
-import type { SelectedSlotSummary } from '../data/availabilityMockData';
+import type { SelectedSlotSummary } from './availabilityMockData';
 import type { ActiveReservation } from '../components/QrTicketCard';
 
 interface BookingConfirmScreenProps {

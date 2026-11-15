@@ -7,7 +7,7 @@ import type {
   SPORT_RESOURCES,
   SlotStatus,
   TimeSlotItem,
-} from '../data/availabilityMockData';
+} from './availabilityMockData';
 
 interface AvailabilityScreenProps {
   sportId: string;
