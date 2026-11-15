@@ -66,6 +66,7 @@ const adminPages: RouteObject[] = [
   { path: 'schedule', lazy: async () => ({ Component: (await import('@/features/admin/schedule/SchedulePage')).default }) },
 { path: 'events', lazy: async () => ({ Component: (await import('@/features/admin/events/EventsPage')).default }) },
 { path: 'rules', lazy: async () => ({ Component: (await import('@/features/admin/rules/RulesPage')).default }) },
+{ path: 'audit', lazy: async () => ({ Component: (await import('@/features/admin/audit/AuditPage')).default }) },
 ];
 
 export const router = createBrowserRouter([
