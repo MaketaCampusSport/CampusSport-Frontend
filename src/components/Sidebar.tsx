@@ -1,5 +1,5 @@
 import { LayoutGrid, Database, Calendar, Trophy, Ban, Megaphone, PieChart, Sliders, History } from 'lucide-react';
-import { AdminView } from '../pages/AdminDashboard';
+import type { AdminView } from '../pages/AdminDashboard';
 
 interface SidebarProps {
   activeView: AdminView;

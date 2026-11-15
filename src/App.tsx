@@ -3,8 +3,8 @@ import AdminDashboard from './pages/AdminDashboard';
 import AvailabilityScreen from './pages/AvailabilityScreen';
 import BookingConfirmScreen from './pages/BookingConfirmScreen';
 import StartScreen, { DEFAULT_UPCOMING_RESERVATION } from './pages/StartScreen';
-import { SelectedSlotSummary } from './data/availabilityMockData';
-import { ActiveReservation } from './components/QrTicketCard';
+import type { SelectedSlotSummary } from './data/availabilityMockData';
+import type { ActiveReservation } from './components/QrTicketCard';
 
 function App() {
   const [roleView, setRoleView] = useState<'student' | 'admin'>('student');
