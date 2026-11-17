@@ -29,7 +29,8 @@
     "announcements": "Announcements",
     "reports": "Reports",
     "rules": "Rules",
-    "audit": "Audit log"
+    "audit": "Audit log",
+    "sports": "Sports"
   },
   "menu": {
     "open": "Account menu",
@@ -660,5 +661,24 @@
     "pageInfo": "Page {{page}} of {{pages}} · {{total}} entries",
     "prev": "Previous page",
     "next": "Next page"
+  },
+  "sports": {
+    "title": "Sports and equipment",
+    "subtitle": "Add or edit sports and their required equipment, with no code changes.",
+    "new": "New sport",
+    "newTitle": "New sport",
+    "editTitle": "Edit sport",
+    "emptyTitle": "No sports defined",
+    "emptyBody": "Add the first sport so students can pick it.",
+    "col": { "nameRo": "Name (RO)", "nameEn": "Name (EN)", "equipment": "Required equipment", "actions": "Actions" },
+    "noEquipment": "No requirements",
+    "fields": { "nameRo": "Name in Romanian", "nameEn": "Name in English", "equipment": "Required equipment" },
+    "hint": { "equipment": "Only resources that have all of this equipment appear when the sport is chosen." },
+    "errors": { "required": "Required field." },
+    "deleteTitle": "Delete the sport “{{name}}”?",
+    "deleteBody": "The sport disappears from the app. It cannot be deleted while a resource uses it.",
+    "delete": "Delete",
+    "toast": { "saved": "The sport “{{name}}” was saved.", "deleted": "The sport was deleted." }
   }
+
 }

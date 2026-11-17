@@ -29,7 +29,8 @@
     "announcements": "Anunțuri",
     "reports": "Rapoarte",
     "rules": "Reguli",
-    "audit": "Jurnal audit"
+    "audit": "Jurnal audit",
+    "sports": "Sporturi"
   },
   "menu": {
     "open": "Meniul contului",
@@ -674,5 +675,23 @@
     "prev": "Pagina anterioară",
     "next": "Pagina următoare"
     
+  },
+  "sports": {
+    "title": "Sporturi și dotări",
+    "subtitle": "Adaugă sau modifică sporturile și dotările necesare, fără modificări de cod.",
+    "new": "Sport nou",
+    "newTitle": "Sport nou",
+    "editTitle": "Editează sportul",
+    "emptyTitle": "Niciun sport definit",
+    "emptyBody": "Adaugă primul sport, ca studenții să îl poată alege.",
+    "col": { "nameRo": "Denumire (RO)", "nameEn": "Denumire (EN)", "equipment": "Dotări necesare", "actions": "Acțiuni" },
+    "noEquipment": "Fără cerințe",
+    "fields": { "nameRo": "Denumire în română", "nameEn": "Denumire în engleză", "equipment": "Dotări necesare" },
+    "hint": { "equipment": "Doar resursele care au toate aceste dotări apar la alegerea sportului." },
+    "errors": { "required": "Câmp obligatoriu." },
+    "deleteTitle": "Ștergi sportul „{{name}}”?",
+    "deleteBody": "Sportul dispare din aplicație. Nu poate fi șters dacă o resursă îl folosește.",
+    "delete": "Șterge",
+    "toast": { "saved": "Sportul „{{name}}” a fost salvat.", "deleted": "Sportul a fost șters." }
   }
 }

@@ -8,6 +8,7 @@ import {
   Megaphone,
   SlidersHorizontal,
   Star,
+  Trophy,
   type LucideIcon,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -28,6 +29,7 @@ interface NavItem {
 const NAV: NavItem[] = [
   { to: '/admin', labelKey: 'nav.dashboard', icon: LayoutGrid, end: true },
   { to: '/admin/resources', labelKey: 'nav.resources', icon: Landmark },
+  { to: '/admin/sports', labelKey: 'nav.sports', icon: Trophy },
   { to: '/admin/schedule', labelKey: 'nav.schedule', icon: CalendarDays },
   { to: '/admin/events', labelKey: 'nav.events', icon: Star },
   { to: '/admin/blocks', labelKey: 'nav.blocks', icon: Lock },
@@ -45,7 +47,7 @@ export function Sidebar({ user }: { user: AdminUser }) {
         <Logo />
       </div>
 
-      <nav aria-label={t('nav.label')} className="mt-8 flex-1 space-y-1">
+      <nav aria-label={t('nav.label')} className="mt-8 flex-1 space-y-1 overflow-y-auto">
         {NAV.map(({ to, labelKey, icon: Icon, end }) => (
           <NavLink
             key={to}
