@@ -20,6 +20,8 @@ import type { AdminUser } from '@/api/types';
 import { cn } from '@/lib/cn';
 import { Logo } from './Logo';
 import { UserMenu } from './UserMenu';
+import { USE_MOCKS } from '@/api/config';
+
 
 interface NavItem {
   to: string;
@@ -51,6 +53,11 @@ export function Sidebar({ user }: { user: AdminUser }) {
     <aside className="fixed inset-y-0 left-0 z-30 flex w-[264px] flex-col bg-navy px-4 py-6">
       <div className="px-2">
         <Logo />
+        {USE_MOCKS && (
+          <span className="mt-3 inline-block rounded-full bg-sun px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-onsun">
+            Demo
+          </span>
+        )}
       </div>
 
       <nav aria-label={t('nav.label')} className="mt-8 flex-1 space-y-1 overflow-y-auto">
