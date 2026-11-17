@@ -32,7 +32,8 @@
     "audit": "Jurnal audit",
     "sports": "Sporturi",
     "users": "Utilizatori",
-    "checkin": "Check-in"
+    "checkin": "Check-in",
+    "account": "Contul meu"
   },
   "menu": {
     "open": "Meniul contului",
@@ -731,5 +732,21 @@
     "failed": "Acces refuzat",
     "member": "Membru al universității",
     "external": "Persoană externă"
+  },
+  "account": {
+    "title": "Contul meu",
+    "subtitle": "Datele contului și securitatea autentificării în doi pași.",
+    "sessionTitle": "Sesiune",
+    "email": "Email",
+    "expires": "Sesiunea expiră la {{time}}",
+    "twofaTitle": "Autentificare în doi pași (TOTP)",
+    "twofaBody": "Scanează codul QR cu o aplicație de autentificare, apoi introdu codul de 6 cifre.",
+    "setup": "Configurează autentificatorul",
+    "secret": "Cheie manuală",
+    "code": "Cod de verificare",
+    "confirm": "Confirmă",
+    "cancel": "Renunță",
+    "errors": { "code": "Introdu cele 6 cifre." },
+    "toast": { "enabled": "Autentificarea în doi pași a fost configurată." }
   }
 }

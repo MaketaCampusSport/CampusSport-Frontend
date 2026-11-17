@@ -11,6 +11,7 @@ import {
   Trophy,
   Users,
   ScanLine,
+  UserCog,
   type LucideIcon,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -41,6 +42,7 @@ const NAV: NavItem[] = [
   { to: '/admin/audit', labelKey: 'nav.audit', icon: ListChecks },
   { to: '/admin/users', labelKey: 'nav.users', icon: Users },
   { to: '/admin/checkin', labelKey: 'nav.checkin', icon: ScanLine },
+  { to: '/admin/account', labelKey: 'nav.account', icon: UserCog },
 ];
 
 export function Sidebar({ user }: { user: AdminUser }) {

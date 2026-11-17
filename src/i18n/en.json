@@ -32,7 +32,8 @@
     "audit": "Audit log",
     "sports": "Sports",
     "users": "Users",
-    "checkin": "Check-in"
+    "checkin": "Check-in",
+    "account": "My account"
   },
   "menu": {
     "open": "Account menu",
@@ -760,5 +761,21 @@
     "failed": "Access denied",
     "member": "University member",
     "external": "External visitor"
+  },
+   "account": {
+    "title": "My account",
+    "subtitle": "Account details and two-step authentication security.",
+    "sessionTitle": "Session",
+    "email": "Email",
+    "expires": "Session expires at {{time}}",
+    "twofaTitle": "Two-step authentication (TOTP)",
+    "twofaBody": "Scan the QR code with an authenticator app, then enter the 6-digit code.",
+    "setup": "Set up authenticator",
+    "secret": "Manual key",
+    "code": "Verification code",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "errors": { "code": "Enter the 6 digits." },
+    "toast": { "enabled": "Two-step authentication was set up." }
   }
 }
