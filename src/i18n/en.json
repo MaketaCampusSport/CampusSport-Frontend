@@ -31,7 +31,8 @@
     "rules": "Rules",
     "audit": "Audit log",
     "sports": "Sports",
-    "users": "Users"
+    "users": "Users",
+    "checkin": "Check-in"
   },
   "menu": {
     "open": "Account menu",
@@ -742,5 +743,22 @@
       "suspended": "{{name}}’s account was suspended.",
       "reactivated": "{{name}}’s account was reactivated."
     }
+  },
+  "checkin": {
+    "title": "Entrance check-in",
+    "subtitle": "Scan the booking’s QR code or enter the code manually.",
+    "startCamera": "Start camera",
+    "stopCamera": "Stop camera",
+    "cameraError": "The camera could not be started. Allow camera access or use the manual code.",
+    "manualLabel": "Booking code",
+    "manualHint": "Demo only: DEMO-OK, DEMO-DUPLICAT, DEMO-EXPIRAT.",
+    "verify": "Verify",
+    "resultTitle": "Result",
+    "idle": "The verification result appears here.",
+    "ok": "Access granted",
+    "already": "Already confirmed",
+    "failed": "Access denied",
+    "member": "University member",
+    "external": "External visitor"
   }
 }

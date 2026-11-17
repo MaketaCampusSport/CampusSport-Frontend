@@ -10,6 +10,7 @@ import {
   Star,
   Trophy,
   Users,
+  ScanLine,
   type LucideIcon,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -39,6 +40,7 @@ const NAV: NavItem[] = [
   { to: '/admin/rules', labelKey: 'nav.rules', icon: SlidersHorizontal },
   { to: '/admin/audit', labelKey: 'nav.audit', icon: ListChecks },
   { to: '/admin/users', labelKey: 'nav.users', icon: Users },
+  { to: '/admin/checkin', labelKey: 'nav.checkin', icon: ScanLine },
 ];
 
 export function Sidebar({ user }: { user: AdminUser }) {

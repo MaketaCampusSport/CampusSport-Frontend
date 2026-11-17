@@ -71,6 +71,7 @@ const adminPages: RouteObject[] = [
   { path: 'reports', lazy: async () => ({ Component: (await import('@/features/admin/reports/ReportsPage')).default }) },
   { path: 'sports', lazy: async () => ({ Component: (await import('@/features/admin/sports/SportsPage')).default }) },
   { path: 'users', lazy: async () => ({ Component: (await import('@/features/admin/users/UsersPage')).default }) },
+  { path: 'checkin', lazy: async () => ({ Component: (await import('@/features/admin/checkin/CheckInPage')).default }) },
 ];
 
 export const router = createBrowserRouter([

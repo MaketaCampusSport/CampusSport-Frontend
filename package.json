@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "api:generate": "openapi-ts" 
+    "api:generate": "openapi-ts"
   },
   "engines": {
     "node": ">=20.19.0"
@@ -28,6 +28,7 @@
     "@tanstack/react-query": "^5.107.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
+    "html5-qrcode": "^2.3.8",
     "i18next": "^27.1.2",
     "lucide-react": "^0.263.1",
     "react": "^18.3.1",
