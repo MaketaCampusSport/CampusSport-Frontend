@@ -30,7 +30,8 @@
     "reports": "Reports",
     "rules": "Rules",
     "audit": "Audit log",
-    "sports": "Sports"
+    "sports": "Sports",
+    "users": "Users"
   },
   "menu": {
     "open": "Account menu",
@@ -670,15 +671,76 @@
     "editTitle": "Edit sport",
     "emptyTitle": "No sports defined",
     "emptyBody": "Add the first sport so students can pick it.",
-    "col": { "nameRo": "Name (RO)", "nameEn": "Name (EN)", "equipment": "Required equipment", "actions": "Actions" },
+    "col": {
+      "nameRo": "Name (RO)",
+      "nameEn": "Name (EN)",
+      "equipment": "Required equipment",
+      "actions": "Actions"
+    },
     "noEquipment": "No requirements",
-    "fields": { "nameRo": "Name in Romanian", "nameEn": "Name in English", "equipment": "Required equipment" },
-    "hint": { "equipment": "Only resources that have all of this equipment appear when the sport is chosen." },
-    "errors": { "required": "Required field." },
+    "fields": {
+      "nameRo": "Name in Romanian",
+      "nameEn": "Name in English",
+      "equipment": "Required equipment"
+    },
+    "hint": {
+      "equipment": "Only resources that have all of this equipment appear when the sport is chosen."
+    },
+    "errors": {
+      "required": "Required field."
+    },
     "deleteTitle": "Delete the sport “{{name}}”?",
     "deleteBody": "The sport disappears from the app. It cannot be deleted while a resource uses it.",
     "delete": "Delete",
-    "toast": { "saved": "The sport “{{name}}” was saved.", "deleted": "The sport was deleted." }
+    "toast": {
+      "saved": "The sport “{{name}}” was saved.",
+      "deleted": "The sport was deleted."
+    }
+  },
+  "users": {
+    "title": "Users",
+    "subtitle": "Search accounts and temporarily suspend users (e.g. after repeated no-shows).",
+    "search": "Search by name or email",
+    "filters": {
+      "role": "Role",
+      "status": "Status",
+      "allRoles": "All roles",
+      "allStatuses": "All statuses"
+    },
+    "roles": {
+      "student": "Student",
+      "teacher": "Teacher",
+      "external": "External"
+    },
+    "status": {
+      "active": "Active",
+      "suspended": "Suspended"
+    },
+    "col": {
+      "user": "User",
+      "role": "Role",
+      "status": "Status",
+      "noShows": "No-shows this month",
+      "actions": "Actions"
+    },
+    "until": "until {{date}}",
+    "emptyTitle": "No users found",
+    "emptyBody": "Try other filters or another search text.",
+    "suspend": "Suspend",
+    "reactivate": "Reactivate",
+    "suspendTitle": "Suspend {{name}}’s account",
+    "suspendBody": "The user will not be able to book while suspended.",
+    "fields": {
+      "days": "Duration (days)",
+      "reason": "Reason"
+    },
+    "errors": {
+      "days": "Enter a number between 1 and 365.",
+      "reason": "The reason is required."
+    },
+    "toast": {
+      "suspended": "{{name}}’s account was suspended.",
+      "reactivated": "{{name}}’s account was reactivated."
+    }
   }
-
 }

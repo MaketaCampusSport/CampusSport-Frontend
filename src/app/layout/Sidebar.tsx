@@ -9,6 +9,7 @@ import {
   SlidersHorizontal,
   Star,
   Trophy,
+  Users,
   type LucideIcon,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -37,6 +38,7 @@ const NAV: NavItem[] = [
   { to: '/admin/reports', labelKey: 'nav.reports', icon: BarChart3 },
   { to: '/admin/rules', labelKey: 'nav.rules', icon: SlidersHorizontal },
   { to: '/admin/audit', labelKey: 'nav.audit', icon: ListChecks },
+  { to: '/admin/users', labelKey: 'nav.users', icon: Users },
 ];
 
 export function Sidebar({ user }: { user: AdminUser }) {

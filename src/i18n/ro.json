@@ -30,7 +30,8 @@
     "reports": "Rapoarte",
     "rules": "Reguli",
     "audit": "Jurnal audit",
-    "sports": "Sporturi"
+    "sports": "Sporturi",
+    "users": "Utilizatori"
   },
   "menu": {
     "open": "Meniul contului",
@@ -693,5 +694,24 @@
     "deleteBody": "Sportul dispare din aplicație. Nu poate fi șters dacă o resursă îl folosește.",
     "delete": "Șterge",
     "toast": { "saved": "Sportul „{{name}}” a fost salvat.", "deleted": "Sportul a fost șters." }
+  },
+  "users": {
+    "title": "Utilizatori",
+    "subtitle": "Caută conturi și suspendă temporar utilizatorii (de ex. după no-show-uri repetate).",
+    "search": "Caută după nume sau email",
+    "filters": { "role": "Rol", "status": "Stare", "allRoles": "Toate rolurile", "allStatuses": "Toate stările" },
+    "roles": { "student": "Student", "teacher": "Profesor", "external": "Extern" },
+    "status": { "active": "Activ", "suspended": "Suspendat" },
+    "col": { "user": "Utilizator", "role": "Rol", "status": "Stare", "noShows": "No-show luna aceasta", "actions": "Acțiuni" },
+    "until": "până la {{date}}",
+    "emptyTitle": "Niciun utilizator găsit",
+    "emptyBody": "Încearcă alte filtre sau alt text de căutare.",
+    "suspend": "Suspendă",
+    "reactivate": "Reactivează",
+    "suspendTitle": "Suspendă contul lui {{name}}",
+    "suspendBody": "Utilizatorul nu va putea face rezervări pe perioada suspendării.",
+    "fields": { "days": "Durată (zile)", "reason": "Motiv" },
+    "errors": { "days": "Introdu un număr între 1 și 365.", "reason": "Motivul este obligatoriu." },
+    "toast": { "suspended": "Contul lui {{name}} a fost suspendat.", "reactivated": "Contul lui {{name}} a fost reactivat." }
   }
 }
