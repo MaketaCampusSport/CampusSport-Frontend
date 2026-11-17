@@ -648,7 +648,12 @@
       "resource_updated": "Resource updated",
       "resource_deactivated": "Resource deactivated",
       "resource_activated": "Resource reactivated",
-      "event_created": "Event created"
+      "event_created": "Event created",
+      "sport_created": "Sport created",
+      "sport_updated": "Sport updated",
+      "sport_deleted": "Sport deleted",
+      "account_reactivated": "Account reactivated",
+      "twofa_enabled": "2FA configured"
     },
     "emptyTitle": "No entries",
     "emptyBody": "Change the filters or the period.",

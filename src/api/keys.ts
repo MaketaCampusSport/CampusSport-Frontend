@@ -1,4 +1,5 @@
-import type { AuditQuery } from './types';
+import type { AuditQuery, UserQuery } from './types';
+
 
 /** Chei TanStack Query – ierarhice, ca invalidarea `['dashboard']` să acopere toate zilele. */
 export const keys = {
@@ -19,4 +20,7 @@ export const keys = {
   settings: ['settings'] as const,
   audit: (q: AuditQuery) => ['audit', q] as const,
   auditAll: ['audit'] as const,
+  users: (q: UserQuery) => ['users', q] as const,
+  usersAll: ['users'] as const,
+
 };

@@ -661,12 +661,18 @@
       "resource_updated": "Resursă modificată",
       "resource_deactivated": "Resursă dezactivată",
       "resource_activated": "Resursă reactivată",
-      "event_created": "Eveniment creat"
+      "event_created": "Eveniment creat",
+      "sport_created": "Sport creat",
+      "sport_updated": "Sport modificat",
+      "sport_deleted": "Sport șters",
+      "account_reactivated": "Cont reactivat",
+      "twofa_enabled": "2FA configurat"
     },
     "emptyTitle": "Nicio înregistrare",
     "emptyBody": "Schimbă filtrele sau perioada.",
     "pageInfo": "Pagina {{page}} din {{pages}} · {{total}} înregistrări",
     "prev": "Pagina anterioară",
     "next": "Pagina următoare"
+    
   }
 }

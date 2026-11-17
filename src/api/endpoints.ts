@@ -13,11 +13,13 @@ import type {
   BlockList,
   BlockPreview,
   BlockPreviewQuery,
+  CheckInResult,
   DashboardData,
   DeliveryReport,
   EventInput,
   EventPreview,
   ExportFormat,
+  ManagedUser,
   ManualClassInput,
   ReportData,
   Resource,
@@ -27,7 +29,11 @@ import type {
   ScheduleResult,
   SessionInfo,
   Sport,
+  SportInput,
+  SuspendInput,
+  TotpSetup,
   UniEvent,
+  UserQuery,
 } from './types';
 
 
@@ -151,7 +157,7 @@ export const api = {
     export: (month: string, format: ExportFormat) => http.blob('/admin/reports', { month, format }),
   },
 
-   settings: {
+  settings: {
     /** SDD 6.1: GET/PUT /admin/settings. Contractul este `RuleSettings` (camelCase) – vezi docs/API-ASSUMPTIONS.md. */
     get: () => http.get<RuleSettings>('/admin/settings'),
     update: (settings: RuleSettings) => http.put<RuleSettings>('/admin/settings', settings),
@@ -169,6 +175,31 @@ export const api = {
       }),
     exportCsv: (q: Omit<AuditQuery, 'page' | 'pageSize'>) =>
       http.blob('/admin/audit', { q: q.q, actorId: q.actorId, period: q.period, format: 'csv' }),
+  },
+  sports: {
+    /** presupus (NFR-14) */
+    create: (input: SportInput) => http.post<Sport>('/admin/sports', input),
+    update: (id: string, input: SportInput) => http.patch<Sport>(`/admin/sports/${id}`, input),
+    /** 409 dacă o resursă folosește sportul. */
+    remove: (id: string) => http.delete<void>(`/admin/sports/${id}`),
+  },
+
+  users: {
+    /** presupus (FR-05) */
+    list: (q: UserQuery) => http.get<ManagedUser[]>('/admin/users', { q: q.q, role: q.role, status: q.status }),
+    suspend: (id: string, input: SuspendInput) => http.post<ManagedUser>(`/admin/users/${id}/suspend`, input),
+    reactivate: (id: string) => http.post<ManagedUser>(`/admin/users/${id}/reactivate`),
+  },
+
+  checkin: {
+    /** presupus (FR-03/FR-15): `code` = conținutul QR scanat sau codul introdus manual. */
+    verify: (code: string) => http.post<CheckInResult>('/admin/check-in', { code }),
+  },
+
+  account: {
+    /** presupus (NFR-08): configurarea TOTP pentru administrator. */
+    totpSetup: () => http.post<TotpSetup>('/admin/2fa/setup'),
+    totpConfirm: (code: string) => http.post<void>('/admin/2fa/confirm', { code }),
   },
 };
 
