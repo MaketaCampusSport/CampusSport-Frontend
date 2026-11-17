@@ -40,3 +40,10 @@ Rutele din SDD 6.1 folosite ca atare: `GET /auth/sso/login`, `GET /sports`, `POS
 Un obiect JSON cu **exact** câmpurile din `RuleSettings` (`src/api/types.ts`), camelCase:
 `quotaMonthly, maxActiveFuture, quotaPerSport, windowTeacherDays, windowStudentDays, windowExternalHours, cancelBeforeHours, checkinBeforeMin, checkinAfterMin, noShowLimit, suspensionDays, waitlistOfferMinutes`.
 Valori implicite din SRS: 4, 2, false, 14, 7, 24, 2, 10, 15, 3, 14, 10.
+
+## Decizii de confirmat cu backend-ul
+
+- **D2 – Setări:** `GET/PUT /admin/settings` întoarce/primește `RuleSettings` în camelCase (câmpurile de mai sus).
+- **D3 – Autentificare:** token de acces în memorie + refresh prin cookie HttpOnly; `POST /auth/refresh` nu e în SDD 6.1.
+- **D4 – Rute noi:** `/admin/sports`, `/admin/users`, `/admin/check-in`, `/admin/2fa/*` sunt presupuse de front-end (tabelul de mai sus).
+- **D5 – Cota „per sport” (SDD 8.2):** comutatorul `quotaPerSport` există, dar valorile separate pe sport nu sunt implementate până nu se decide regula.
