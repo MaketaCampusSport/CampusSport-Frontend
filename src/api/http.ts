@@ -149,10 +149,11 @@ async function send(method: string, path: string, opts: RequestOptions = {}, can
   }
 
   if (!res.ok) {
-    if (res.status === 401) {
+    if (res.status === 401 && !path.startsWith('/auth/') && path !== '/me') {
       setAccessToken(null);
       unauthorizedHandler?.();
     }
+
     throw await toApiError(res);
   }
   return res;

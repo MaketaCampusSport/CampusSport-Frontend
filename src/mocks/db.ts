@@ -6,10 +6,12 @@ import type {
   BlockKind,
   BlockRecurrence,
   EventRecurrence,
+  ManagedUser,
   Resource,
   RuleSettings,
   SchedulePreview,
   Sport,
+  UserKind,
 } from '@/api/types';
 
 export const ADMIN = { id: 'u-admin-1', fullName: 'Maria Ionescu', email: 'maria.ionescu@univ.example', role: 'admin' as const };
@@ -105,6 +107,7 @@ export interface Db {
   imports: Map<string, { preview: SchedulePreview; classes: EfClass[]; cancelKeys: string[] }>;
   announcements: Announcement[];
   audit: AuditEntry[];
+  users: ManagedUser[];
   settings: RuleSettings;
   seq: number;
 }
@@ -127,6 +130,30 @@ function nextWeekday(from: Date, isoDay: number): Date {
   const diff = (isoDay - (d.getDay() === 0 ? 7 : d.getDay()) + 7) % 7 || 7;
   return addDays(d, diff);
 }
+
+function seedUsers(): ManagedUser[] {
+  const rows: [string, string, string, UserKind, number, string | null][] = [
+    ['u-1', 'Andrei Popescu', 'andrei.popescu@univ.example', 'student', 0, null],
+    ['u-2', 'Ioana Marin', 'ioana.marin@univ.example', 'student', 2, null],
+    ['u-3', 'Vlad Dumitru', 'vlad.dumitru@univ.example', 'student', 3, addDays(new Date(), 9).toISOString()],
+    ['u-4', 'Elena Stan', 'elena.stan@univ.example', 'teacher', 0, null],
+    ['u-5', 'Radu Georgescu', 'radu.georgescu@mail.example', 'external', 1, null],
+    ['u-6', 'Cristina Neagu', 'cristina.neagu@mail.example', 'external', 0, null],
+  ];
+  return rows.map(
+    ([id, fullName, email, role, noShowsThisMonth, suspendedUntil]): ManagedUser => ({
+      id,
+      fullName,
+      email,
+      phone: '+40 700 000 000',
+      role,
+      status: suspendedUntil ? 'suspended' : 'active',
+      suspendedUntil,
+      noShowsThisMonth,
+    }),
+  );
+}
+
 
 export function createDb(now = new Date()): Db {
   const today = startOfDay(now);
@@ -188,6 +215,7 @@ export function createDb(now = new Date()): Db {
     imports: new Map(),
     announcements,
     audit: [],
+    users: seedUsers(),
     settings: {
       quotaMonthly: 4,
       maxActiveFuture: 2,

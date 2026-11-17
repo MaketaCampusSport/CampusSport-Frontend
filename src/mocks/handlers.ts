@@ -16,6 +16,9 @@ import type {
   RuleSettings,
   SchedulePreview,
   ScheduleConflict,
+  Sport,
+  SportInput,
+  SuspendInput,
   UserKind,
 } from '@/api/types';
 import { toCsv } from '@/lib/csv';
@@ -933,6 +936,122 @@ export const handlers = [
       pageSize,
       actors,
     });
+  }),
+  /* Sporturi (Admin, NFR-14) */
+  http.post(url('/admin/sports'), async ({ request }) => {
+    await lag();
+    if (!authed()) return unauthorized();
+    const input = (await request.json()) as SportInput;
+    const created: Sport = { ...input, id: nextId('s') };
+    SPORTS.push(created);
+    addAudit('sport_created', created.nameRo);
+    return HttpResponse.json(created, { status: 201 });
+  }),
+  http.patch(url('/admin/sports/:id'), async ({ request, params }) => {
+    await lag();
+    if (!authed()) return unauthorized();
+    const s = SPORTS.find((x) => x.id === params.id);
+    if (!s) return err(404, 'NOT_FOUND', 'Sportul nu există.', 'Sport not found.');
+    Object.assign(s, (await request.json()) as SportInput);
+    addAudit('sport_updated', s.nameRo);
+    return HttpResponse.json(s);
+  }),
+  http.delete(url('/admin/sports/:id'), async ({ params }) => {
+    await lag();
+    if (!authed()) return unauthorized();
+    const i = SPORTS.findIndex((x) => x.id === params.id);
+    if (i < 0) return err(404, 'NOT_FOUND', 'Sportul nu există.', 'Sport not found.');
+    if (db.resources.some((r) => r.sportIds.includes(String(params.id)))) {
+      return err(409, 'SPORT_IN_USE', 'Sportul este folosit de cel puțin o resursă.', 'The sport is used by at least one resource.');
+    }
+    const [removed] = SPORTS.splice(i, 1);
+    addAudit('sport_deleted', removed ? removed.nameRo : String(params.id));
+    return new HttpResponse(null, { status: 204 });
+  }),
+
+  /* Utilizatori (Admin, FR-05) */
+  http.get(url('/admin/users'), async ({ request }) => {
+    await lag();
+    if (!authed()) return unauthorized();
+    const p = new URL(request.url).searchParams;
+    const q = (p.get('q') ?? '').trim().toLowerCase();
+    const role = p.get('role');
+    const status = p.get('status');
+    const list = db.users.filter(
+      (u) =>
+        (!q || u.fullName.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)) &&
+        (!role || u.role === role) &&
+        (!status || u.status === status),
+    );
+    return HttpResponse.json(list);
+  }),
+  http.post(url('/admin/users/:id/suspend'), async ({ request, params }) => {
+    await lag();
+    if (!authed()) return unauthorized();
+    const u = db.users.find((x) => x.id === params.id);
+    if (!u) return err(404, 'NOT_FOUND', 'Utilizatorul nu există.', 'User not found.');
+    const { days, reason } = (await request.json()) as SuspendInput;
+    if (!reason?.trim() || !(days >= 1 && days <= 365)) {
+      return err(422, 'VALIDATION', 'Motivul și durata (1–365 zile) sunt obligatorii.', 'Reason and duration (1–365 days) are required.');
+    }
+    u.status = 'suspended';
+    u.suspendedUntil = addDays(new Date(), days).toISOString();
+    addAudit('account_suspended', `${u.fullName} – ${days} zile`);
+    return HttpResponse.json(u);
+  }),
+  http.post(url('/admin/users/:id/reactivate'), async ({ params }) => {
+    await lag();
+    if (!authed()) return unauthorized();
+    const u = db.users.find((x) => x.id === params.id);
+    if (!u) return err(404, 'NOT_FOUND', 'Utilizatorul nu există.', 'User not found.');
+    u.status = 'active';
+    u.suspendedUntil = null;
+    addAudit('account_reactivated', u.fullName);
+    return HttpResponse.json(u);
+  }),
+
+  /* Check-in personal (FR-03 / FR-15). Coduri demo: DEMO-OK, DEMO-DUPLICAT, DEMO-EXPIRAT */
+  http.post(url('/admin/check-in'), async ({ request }) => {
+    await lag();
+    if (!authed()) return unauthorized();
+    const { code } = (await request.json()) as { code: string };
+    const c = (code ?? '').trim().toUpperCase();
+    const now = new Date();
+    const base = {
+      bookingId: 'b-demo',
+      userName: 'Andrei Popescu',
+      userKind: 'student' as const,
+      resourceName: 'Terenul 2',
+      startsAt: now.toISOString(),
+      endsAt: addHours(now, 1).toISOString(),
+    };
+    if (c === 'DEMO-OK') return HttpResponse.json({ ...base, outcome: 'ok' });
+    if (c === 'DEMO-DUPLICAT') return HttpResponse.json({ ...base, outcome: 'already_checked_in' });
+    if (c === 'DEMO-EXPIRAT') {
+      return err(422, 'CHECKIN_WINDOW', 'Check-in-ul este permis între −10 și +15 minute față de început.', 'Check-in is allowed from −10 to +15 minutes around the start time.');
+    }
+    return err(422, 'QR_INVALID', 'Cod invalid sau expirat.', 'Invalid or expired code.');
+  }),
+
+  /* Cont administrator: configurare TOTP (NFR-08) */
+  http.post(url('/admin/2fa/setup'), async () => {
+    await lag();
+    if (!authed()) return unauthorized();
+    const secret = 'JBSWY3DPEHPK3PXP';
+    return HttpResponse.json({
+      secret,
+      otpauthUrl: `otpauth://totp/CampusSport:${ADMIN.email}?secret=${secret}&issuer=CampusSport`,
+    });
+  }),
+  http.post(url('/admin/2fa/confirm'), async ({ request }) => {
+    await lag();
+    if (!authed()) return unauthorized();
+    const { code } = (await request.json()) as { code: string };
+    if (code !== '123456') {
+      return err(422, 'TOTP_INVALID', 'Cod invalid sau expirat.', 'Invalid or expired code.');
+    }
+    addAudit('twofa_enabled', ADMIN.fullName);
+    return new HttpResponse(null, { status: 204 });
   }),
 ];
 

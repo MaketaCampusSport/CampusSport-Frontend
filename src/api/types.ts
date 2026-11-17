@@ -333,7 +333,12 @@ export type AuditAction =
   | 'resource_updated'
   | 'resource_deactivated'
   | 'resource_activated'
-  | 'event_created';
+  | 'event_created'
+  | 'sport_created'
+  | 'sport_updated'
+  | 'sport_deleted'
+  | 'account_reactivated'
+  | 'twofa_enabled';
 
 export type AuditPeriod = '24h' | '7d' | '30d' | '12m';
 
@@ -359,4 +364,52 @@ export interface AuditPage {
   page: number;
   pageSize: number;
   actors: { id: string; name: string }[];
+}
+/* ───────────── Sporturi (admin, NFR-14) ───────────── */
+
+export type SportInput = Omit<Sport, 'id'>;
+
+/* ───────────── Utilizatori (admin, FR-05) ───────────── */
+
+export type AccountStatus = 'active' | 'suspended';
+
+export interface ManagedUser {
+  id: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  role: UserKind;
+  status: AccountStatus;
+  suspendedUntil: string | null;
+  noShowsThisMonth: number;
+}
+
+export interface UserQuery {
+  q?: string;
+  role?: UserKind | '';
+  status?: AccountStatus | '';
+}
+
+export interface SuspendInput {
+  days: number;
+  reason: string;
+}
+
+/* ───────────── Check-in personal (FR-03 / FR-15) ───────────── */
+
+export interface CheckInResult {
+  bookingId: string;
+  userName: string;
+  userKind: UserKind;
+  resourceName: string;
+  startsAt: string;
+  endsAt: string;
+  outcome: 'ok' | 'already_checked_in';
+}
+
+/* ───────────── Cont administrator / 2FA (NFR-08) ───────────── */
+
+export interface TotpSetup {
+  secret: string;
+  otpauthUrl: string;
 }

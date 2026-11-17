@@ -42,7 +42,7 @@ export function useSession() {
   return useQuery({
     queryKey: keys.session,
     queryFn: async () => {
-      if (!USE_MOCKS) {
+      if (import.meta.env.DEV && !USE_MOCKS) {
         const token = getAccessToken();
         const devSession = token ? sessionFromJwt(token) : null;
         if (devSession) return devSession;

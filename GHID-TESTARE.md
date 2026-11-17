@@ -83,6 +83,21 @@ Terminalul afișează `Local: http://localhost:5173/`. Deschide adresa în brows
 ### Jurnal audit
 - Caută text, filtrează după administrator și perioadă, paginează, exportă CSV.
 
+### Sporturi (NFR-14)
+- **Sport nou** → denumiri RO/EN + dotări necesare → apare în tabel și în formularul Resurse.
+- **Șterge** un sport folosit de o resursă (ex. Fotbal) → mesaj de eroare (409).
+
+### Utilizatori (FR-05)
+- Caută după nume/email, filtrează după rol și stare.
+- **Suspendă** cu durată (1–365 zile) și motiv; **Reactivează**. Acțiunile apar în *Jurnal audit*.
+
+### Check-in (FR-03 / FR-15)
+- Introdu `DEMO-OK`, `DEMO-DUPLICAT` sau `DEMO-EXPIRAT` (în demo). Orice alt cod este respins.
+- Pe dispozitiv real: **Pornește camera** și scanează QR-ul rezervării (camera cere HTTPS sau `localhost`).
+
+### Contul meu (NFR-08)
+- **Configurează autentificatorul** → QR + cheie manuală; confirmă cu `123456` (un cod greșit afișează eroare).
+
 ## 6. Teme, limbă, accesibilitate
 - Meniul din colțul stânga-jos (numele tău): **Limbă** (RO/EN) și **Aspect** (Sistem/Luminos/Întunecat).
 - Tastatură: `Tab` / `Shift+Tab` parcurg elementele, `Esc` închide ferestrele, `Enter`/`Space` activează butoanele. Primul `Tab` arată „Sari la conținut”.
@@ -98,14 +113,15 @@ npm run build:demo  # build static cu serverul simulat inclus (se poate publica 
 npm run preview     # servește build-ul local, la http://localhost:4173
 ```
 
-Testele acoperă validările (resurse, reguli, anunțuri), exportul CSV, paritatea traducerilor RO/EN (fiecare cheie folosită în cod există în ambele limbi), fluxul de blocare de urgență și autentificarea în 2 pași.
+Testele acoperă validările (resurse, reguli, anunțuri), exportul CSV, paritatea traducerilor RO/EN (fiecare cheie folosită în cod există în ambele limbi), tema (luminos/întunecat), contractul API (parametri de interogare, setări, jurnal audit), fluxul de blocare de urgență și autentificarea în 2 pași, rutele paginilor de administrare (sporturi, utilizatori, check-in, 2FA) și accesibilitatea structurală (axe). Contrastul se verifică manual (Lighthouse), nu în teste.
 
 ## 8. Conectarea la backend-ul real
 
-1. Copiază `.env.example` în `.env.local` și setează `VITE_USE_MOCKS=false`.
+1. Copiază `.env.example` în **`.env.development.local`** (nu `.env.local`: `.env.development` are prioritate peste `.env.local` și ar păstra serverul simulat) și setează `VITE_USE_MOCKS=false`.
 2. Setează `VITE_API_PROXY_TARGET` la adresa serverului NestJS (implicit `http://localhost:3000`).
-3. Repornește `npm run dev`. Cererile către `/api/v1/...` trec prin proxy.
-4. Rutele „presupuse” (neprecizate în SDD) sunt în `docs/API-ASSUMPTIONS.md` și trebuie confirmate cu echipa de backend.
+3. Repornește `npm run dev` (fișierele `.env` se citesc doar la pornire). Cererile către `/api/v1/...` trec prin proxy.
+4. Fără SSO real, doar în dezvoltare, poți seta `VITE_DEV_TOKEN` cu un JWT de test (ignorat în build-ul de producție).
+5. Rutele „presupuse” (neprecizate în SDD) și deciziile de confirmat sunt în `docs/API-ASSUMPTIONS.md`.
 
 ## 9. Probleme frecvente
 
@@ -115,4 +131,4 @@ Testele acoperă validările (resurse, reguli, anunțuri), exportul CSV, paritat
 | Portul 5173 e ocupat | Pornește cu `npm run dev -- --port 5174`. |
 | Pagina e goală și consola arată `mockServiceWorker.js` | Rulează din rădăcina proiectului; fișierul e în `public/`. În Firefox privat, service worker-ul poate fi blocat: folosește o fereastră normală. |
 | Te întoarce mereu la login | Normal după F5 (sesiunea demo e în memorie). Autentifică-te din nou. |
-| Fonturile arată diferit | Inter se încarcă din pachet, nu de pe internet; golește cache-ul browserului. |
+| Fonturile (Barlow) se încarcă din pachet, nu de pe internet; golește cache-ul browserului. |

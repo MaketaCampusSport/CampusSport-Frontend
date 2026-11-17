@@ -21,10 +21,20 @@ const PERIODS: AuditPeriod[] = ['24h', '7d', '30d', '12m'];
 
 function toneOf(a: AuditAction): BadgeTone {
   if (a === 'emergency_block' || a === 'account_suspended') return 'danger';
-  if (a === 'planned_block' || a === 'block_updated' || a === 'rule_changed') return 'warn';
-  if (a === 'unblock' || a === 'resource_activated' || a === 'resource_created') return 'success';
+  if (a === 'planned_block' || a === 'block_updated' || a === 'rule_changed' || a === 'sport_deleted') return 'warn';
+  if (
+    a === 'unblock' ||
+    a === 'resource_activated' ||
+    a === 'resource_created' ||
+    a === 'sport_created' ||
+    a === 'account_reactivated' ||
+    a === 'twofa_enabled'
+  ) {
+    return 'success';
+  }
   return 'brand';
 }
+
 
 /** Jurnal de audit (FR-45): doar citire, căutare, filtre, export CSV. */
 export default function AuditPage() {
