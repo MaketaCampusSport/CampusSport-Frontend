@@ -37,3 +37,11 @@ export const useUiStore = create<UiState>((set) => ({
     set({ theme });
   },
 }));
+/** Aplică tema la pornire și o urmărește pe cea a sistemului când preferința este „system”. */
+export function initTheme(): void {
+  applyTheme(useUiStore.getState().theme);
+  const mq = window.matchMedia('(prefers-color-scheme: dark)');
+  mq.addEventListener('change', () => {
+    if (useUiStore.getState().theme === 'system') applyTheme('system');
+  });
+}

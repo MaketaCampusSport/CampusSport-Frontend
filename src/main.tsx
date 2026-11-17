@@ -16,7 +16,9 @@ import './i18n';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './app/App';
+import { initTheme } from './stores/uiStore';
 
+initTheme();
 async function enableMocking() {
   const { USE_MOCKS } = await import('./api/config');
   if (!import.meta.env.DEV || !USE_MOCKS) return;
