@@ -51,7 +51,7 @@ function buildUrl(path: string, query?: Query): string {
     }
   }
   const qs = params.toString();
-  return `${API_BASE}${path}${qs ? `?\${qs}` : ''}`;
+  return `${API_BASE}${path}${qs ? `?${qs}` : ''}`;
 }
 
 /** Erorile serverului au message_ro și message_en – alegem limba curentă (cu fallback pentru MSW). */

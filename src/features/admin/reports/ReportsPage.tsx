@@ -51,7 +51,12 @@ export default function ReportsPage() {
   }
 
   const d = report.data;
-  const chartColors = { bar: 'var(--chart-bar, #1F4BFF)', peak: 'var(--chart-peak, #FFCC00)' };
+   const chartColors = {
+    bar: 'rgb(var(--c-brand))',
+    peak: 'rgb(var(--c-sun))',
+    grid: 'rgb(var(--c-line))',
+    tick: 'rgb(var(--c-muted))',
+  };
 
   return (
     <>
@@ -90,10 +95,20 @@ export default function ReportsPage() {
               <div className="mt-4 h-72" role="img" aria-label={t('reports.hourlyAlt')}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={d.hourly} margin={{ top: 8, right: 8, bottom: 0, left: -16 }}>
-                    <CartesianGrid vertical={false} stroke="var(--color-line, #E5EAF2)" />
-                    <XAxis dataKey="hour" tickFormatter={(h: number) => `${h}`} tickLine={false} axisLine={false} fontSize={12} />
-                    <YAxis tickFormatter={(v: number) => `${v}%`} domain={[0, 100]} tickLine={false} axisLine={false} fontSize={12} />
-                    <Tooltip formatter={(v) => `${v}%`} labelFormatter={(h) => `${h}:00`} cursor={{ fill: 'rgba(31,75,255,.08)' }} />
+                    <CartesianGrid vertical={false} stroke={chartColors.grid} />
+                    <XAxis dataKey="hour" tickFormatter={(h: number) => `${h}`} tickLine={false} axisLine={false} fontSize={12} tick={{ fill: chartColors.tick }} />
+                    <YAxis tickFormatter={(v: number) => `${v}%`} domain={[0, 100]} tickLine={false} axisLine={false} fontSize={12} tick={{ fill: chartColors.tick }} />
+                    <Tooltip
+                      formatter={(v) => `${v}%`}
+                      labelFormatter={(h) => `${h}:00`}
+                      cursor={{ fill: 'rgb(var(--c-brand) / 0.08)' }}
+                      contentStyle={{
+                        background: 'rgb(var(--c-surface))',
+                        border: '1px solid rgb(var(--c-line))',
+                        borderRadius: 12,
+                        color: 'rgb(var(--c-ink))',
+                      }}
+                    />
                     <Bar dataKey="pct" radius={[6, 6, 0, 0]}>
                       {d.hourly.map((h) => <Cell key={h.hour} fill={h.pct >= 85 ? chartColors.peak : chartColors.bar} />)}
                     </Bar>

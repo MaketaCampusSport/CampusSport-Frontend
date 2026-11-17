@@ -16,7 +16,7 @@ npm run dev        # http://localhost:5173/admin  (SSO demo, cod 123456)
 
 ## Stack (conform documentației tehnice)
 
-React 19 · TypeScript 6.0 · Vite 8 (țintă Safari 16) · Tailwind CSS 3.4 · Zustand 4 · React Router 7 (import din `react-router`, rute lazy) · TanStack Query 5 · Radix UI · lucide-react · date-fns 4 · i18next (RO implicit, EN) · Recharts 3 · Vitest + Testing Library + MSW 2 · @hey-api/openapi-ts.
+React 18 · TypeScript 6.0 · Vite 8 (țintă Safari 16) · Tailwind CSS 3.4 · Zustand 5 · React Router 7 (import din `react-router`, rute lazy) · TanStack Query 5 · Radix UI · lucide-react · date-fns 4 · i18next (RO implicit, EN) · Recharts 3 · Vitest + Testing Library + MSW 2 · @hey-api/openapi-ts.
 
 ## Structura proiectului
 
