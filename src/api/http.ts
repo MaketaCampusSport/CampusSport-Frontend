@@ -51,7 +51,7 @@ function buildUrl(path: string, query?: Query): string {
     }
   }
   const qs = params.toString();
-  return `${API_BASE}${path}${qs ? `?\${qs}` : ''}`;
+  return `${API_BASE}${path}${qs ? `?${qs}` : ''}`;
 }
 
 /** Erorile serverului au message_ro și message_en – alegem limba curentă (cu fallback pentru MSW). */
@@ -149,10 +149,11 @@ async function send(method: string, path: string, opts: RequestOptions = {}, can
   }
 
   if (!res.ok) {
-    if (res.status === 401) {
+    if (res.status === 401 && !path.startsWith('/auth/') && path !== '/me') {
       setAccessToken(null);
       unauthorizedHandler?.();
     }
+
     throw await toApiError(res);
   }
   return res;
