@@ -36,7 +36,7 @@ export default defineConfig(({ mode }) => {
       setupFiles: ['./src/test/setup.ts'],
       env: {
         VITE_API_BASE_URL: 'http://localhost/api/v1',
-        VITE_USE_MOCKS: 'false',
+        VITE_USE_MOCKS: 'true',
         VITE_MOCK_LATENCY: '0',
       },
     },
