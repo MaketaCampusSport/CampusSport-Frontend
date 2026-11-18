@@ -11,14 +11,13 @@ import { Field, Input, Select } from '@/components/ui/fields';
 import { ResourceThumb } from '@/components/ui/ResourceThumb';
 import { cn } from '@/lib/cn';
 import {
-  EQUIPMENT_IDS,
   SLOT_MINUTES,
   hasErrors,
   missingEquipment,
   validateResource,
   type ResourceFormState,
 } from '@/lib/validators';
-import { sportName } from '../shared/queries';
+import { equipmentLabel, sportName, useEquipmentOptions } from '../shared/queries';
 
 const DEFAULT_WINDOW = { days: [1, 2, 3, 4, 5] as IsoWeekday[], from: '16:00', to: '20:00' };
 
@@ -51,6 +50,7 @@ interface Props {
 /** Panoul de editare / creare resursă (FR-39). Se remontează (key) la schimbarea resursei selectate. */
 export function ResourcePanel({ resource, sports, saving, saveError, onSave, onDeactivate, onActivate, onBlock }: Props) {
   const { t, i18n } = useTranslation();
+  const equipmentOptions = useEquipmentOptions();
   const [form, setForm] = useState<ResourceFormState>(() => toForm(resource));
   const [submitted, setSubmitted] = useState(false);
 
@@ -133,9 +133,9 @@ export function ResourcePanel({ resource, sports, saving, saveError, onSave, onD
           <fieldset>
             <legend className="mb-2 text-sm font-semibold text-ink">{t('resources.fields.equipment')}</legend>
             <div className="flex flex-wrap gap-2">
-              {EQUIPMENT_IDS.map((id) => (
+              {equipmentOptions.map((id) => (
                 <Chip key={id} pressed={form.equipment.includes(id)} onPressedChange={(on) => set('equipment', toggleInList(form.equipment, id, on))}>
-                  {t(`equipment.${id}`)}
+                  {equipmentLabel(id)}
                 </Chip>
               ))}
             </div>
@@ -143,7 +143,7 @@ export function ResourcePanel({ resource, sports, saving, saveError, onSave, onD
               <p key={sport.id} role="alert" className="mt-2 text-xs font-semibold text-warn-ink">
                 {t('resources.errors.needsEquipment', {
                   sport: sportName(sport, i18n.language),
-                  equipment: m.map((e) => t(`equipment.${e}`)).join(', '),
+                  equipment: m.map((e) => equipmentLabel(e)).join(', '),
                 })}
               </p>
             ))}
