@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Info, ShieldCheck } from 'lucide-react';
 import { useEffect, useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Navigate, useLocation, useNavigate } from 'react-router';
+import { Navigate, useLocation, useNavigate, useSearchParams } from 'react-router';
 import { USE_MOCKS } from '@/api/config';
 import { api } from '@/api/endpoints';
 import { ApiError } from '@/api/http';
@@ -36,6 +36,13 @@ export default function LoginPage() {
   const session = useSession();
   const [code, setCode] = useState('');
 
+  // Backend-ul real ne trimite la `/auth/2fa?challenge_id=…&return_to=…` după SSO (sau `?error=totp_not_enrolled`).
+  const [params] = useSearchParams();
+  const challengeId = params.get('challenge_id') ?? undefined;
+  const ssoError = params.get('error');
+  const returnTo = params.get('return_to');
+  const target = returnTo && returnTo.startsWith('/admin') ? returnTo : from;
+
   // Sesiune expirată: ștergem datele vechi și pornim de la zero.
   useEffect(() => {
     if (sessionExpired) {
@@ -52,17 +59,17 @@ export default function LoginPage() {
   });
 
   const totp = useMutation({
-    mutationFn: (value: string) => api.auth.verifyTotp(value),
+    mutationFn: (value: string) => api.auth.verifyTotp(value, challengeId),
     onSuccess: (info) => {
       queryClient.setQueryData(keys.session, info);
-      navigate(from, { replace: true });
+      navigate(target, { replace: true });
     },
   });
 
   if (session.isPending) return <FullPageSpinner />;
-  if (session.data?.twoFactorVerified) return <Navigate to={from} replace />;
+  if (session.data?.twoFactorVerified) return <Navigate to={target} replace />;
 
-  const needsCode = !!session.data;
+  const needsCode = !!session.data || !!challengeId;
   const codeError =
     totp.error instanceof ApiError
       ? totp.error.status === 401 || totp.error.status === 400
@@ -98,8 +105,18 @@ export default function LoginPage() {
         <p className="eyebrow text-brand-text">{needsCode ? t('login.step2') : t('login.step1')}</p>
         <h1 className="heading mt-2 text-3xl leading-tight">{t(needsCode ? 'login.codeTitle' : 'login.title')}</h1>
         <p className="mt-2 text-[15px] text-muted">
-          {needsCode ? t('login.codeBody', { name: session.data?.user.fullName }) : t('login.body')}
+          {needsCode
+            ? session.data
+              ? t('login.codeBody', { name: session.data.user.fullName })
+              : t('login.codeBodyAnon')
+            : t('login.body')}
         </p>
+
+        {ssoError === 'totp_not_enrolled' && (
+          <Banner tone="warn" title={t('login.notEnrolledTitle')} className="mt-6" role="alert">
+            {t('login.notEnrolledBody')}
+          </Banner>
+        )}
 
         {(state.expired || sessionExpired) && !needsCode && (
           <Banner tone="warn" title={t('login.expiredTitle')} className="mt-6" role="status">
