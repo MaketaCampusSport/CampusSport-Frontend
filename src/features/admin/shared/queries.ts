@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { USE_MOCKS } from '@/api/config';
 import { api } from '@/api/endpoints';
 import { keys } from '@/api/keys';
 import type { Resource, Sport } from '@/api/types';
@@ -23,13 +24,15 @@ export function activeResources(list: Resource[] | undefined): Resource[] {
 }
 
 /**
- * Dotările alese în formulare: cele standard + orice valoare existentă pe server (sporturi și resurse).
- * Backend-ul are text liber („panou”, „fileu tenis”…), deci lista nu poate fi fixă.
+ * Dotările alese în formulare.
+ * - Demo (MSW): lista standard din front-end.
+ * - Backend real: doar valorile existente pe server (cerute de sporturi sau puse pe resurse). Backend-ul are
+ *   text liber („panou”, „fileu tenis”…); dacă am afișa și lista standard, ar apărea dubluri („Panouri” / „panou”).
  */
 export function useEquipmentOptions(): string[] {
   const sports = useSports().data;
   const resources = useResources().data;
-  const all = new Set<string>(EQUIPMENT_IDS);
+  const all = new Set<string>(USE_MOCKS ? EQUIPMENT_IDS : []);
   sports?.forEach((s) => s.requiredEquipment.forEach((e) => all.add(e)));
   resources?.forEach((r) => r.equipment.forEach((e) => all.add(e)));
   return [...all];
