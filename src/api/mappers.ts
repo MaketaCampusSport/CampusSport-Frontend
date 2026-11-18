@@ -214,32 +214,72 @@ export const toSettings = (s: BSettings): RuleSettings => ({
   waitlistOfferMinutes: s.waitlist_offer_minutes,
 });
 
-/** PUT-ul serverului cere TOATE câmpurile → pornim de la valorile curente și suprascriem ce știe formularul. */
-export const fromSettings = (s: RuleSettings, current: BSettings): BSettings => ({
-  ...current,
-  monthly_quota: s.quotaMonthly,
-  max_active_bookings: s.maxActiveFuture,
-  booking_window_days_teacher: s.windowTeacherDays,
-  booking_window_days_student: s.windowStudentDays,
-  booking_window_hours_external: s.windowExternalHours,
-  cancel_free_hours: s.cancelBeforeHours,
-  checkin_minutes_before: s.checkinBeforeMin,
-  checkin_minutes_after: s.checkinAfterMin,
-  no_show_threshold: s.noShowLimit,
-  no_show_suspension_days: s.suspensionDays,
-  waitlist_offer_minutes: s.waitlistOfferMinutes,
-  // Dezactivarea „per sport” golește valorile; activarea păstrează ce există deja pe server (D5).
-  monthly_quota_per_sport: s.quotaPerSport ? (current.monthly_quota_per_sport ?? {}) : {},
-});
+/**
+ * PUT-ul serverului cere TOATE câmpurile modificabile → pornim de la valorile curente și suprascriem ce știe formularul.
+ * `updated_by` / `updated_at` sunt doar de citit: dacă le trimitem înapoi, serverul răspunde 422.
+ */
+export function fromSettings(s: RuleSettings, current: BSettings): Omit<BSettings, 'updated_by' | 'updated_at'> {
+  const writable: Partial<BSettings> = { ...current };
+  delete writable.updated_by;
+  delete writable.updated_at;
+  return {
+    ...(writable as Omit<BSettings, 'updated_by' | 'updated_at'>),
+    monthly_quota: s.quotaMonthly,
+    max_active_bookings: s.maxActiveFuture,
+    booking_window_days_teacher: s.windowTeacherDays,
+    booking_window_days_student: s.windowStudentDays,
+    booking_window_hours_external: s.windowExternalHours,
+    cancel_free_hours: s.cancelBeforeHours,
+    checkin_minutes_before: s.checkinBeforeMin,
+    checkin_minutes_after: s.checkinAfterMin,
+    no_show_threshold: s.noShowLimit,
+    no_show_suspension_days: s.suspensionDays,
+    waitlist_offer_minutes: s.waitlistOfferMinutes,
+    // Dezactivarea „per sport” golește valorile; activarea păstrează ce există deja pe server (D5).
+    monthly_quota_per_sport: s.quotaPerSport ? (current.monthly_quota_per_sport ?? {}) : {},
+  };
+}
 
 /* ───────────── Audit ───────────── */
+
+const field = (o: unknown, k: string): unknown =>
+  o && typeof o === 'object' ? (o as Record<string, unknown>)[k] : undefined;
+
+/** Acțiunile serverului (`resource.update` …) → acțiunile din interfață. Necunoscutele se afișează ca atare. */
+export function toAuditAction(e: BAuditEntry): AuditAction {
+  switch (e.action) {
+    case 'block.create':
+      return field(e.after, 'kind') === 'emergency' ? 'emergency_block' : 'planned_block';
+    case 'block.delete':
+      return 'unblock';
+    case 'resource.create':
+      return 'resource_created';
+    case 'resource.update':
+      if (field(e.after, 'active') === false && field(e.before, 'active') !== false) return 'resource_deactivated';
+      if (field(e.after, 'active') === true && field(e.before, 'active') === false) return 'resource_activated';
+      return 'resource_updated';
+    case 'settings.update':
+      return 'rule_changed';
+    case 'sport.create':
+      return 'sport_created';
+    case 'sport.update':
+      return 'sport_updated';
+    case 'user.suspend':
+    case 'user.auto_suspend':
+      return 'account_suspended';
+    case 'user.reactivate':
+      return 'account_reactivated';
+    default:
+      return e.action as AuditAction;
+  }
+}
 
 export const toAuditEntry = (e: BAuditEntry): AuditEntry => ({
   id: e.id,
   at: e.at,
   // Serverul trimite doar `actor_id`; numele va veni când backend-ul îl adaugă (vezi BACKEND-CERERI.md).
   actor: { id: e.actor_id, name: e.actor_id.slice(0, 8) },
-  action: e.action as AuditAction,
+  action: toAuditAction(e),
   object: e.entity_id ? `${e.entity} · ${e.entity_id.slice(0, 8)}` : e.entity,
 });
 

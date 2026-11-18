@@ -58,10 +58,11 @@ async function loadBlocks(): Promise<BBlock[]> {
   return page.items;
 }
 
-/** Blocările active acum, pe resursă (pentru insigna „blocată” din catalog). */
+/** Tipul blocării active acum pe resursă (`emergency` / `maintenance`) – interfața îl traduce, nu afișează motivul. */
 function activeBlockLabel(blocks: BBlock[], resourceId: string): string | null {
   const b = blocks.find((x) => x.resource_id === resourceId && blockStatus(x) === 'active');
-  return b ? b.reason : null;
+  if (!b) return null;
+  return b.kind === 'emergency' ? 'emergency' : 'maintenance';
 }
 
 function cellState(slot: BDashboard['resources'][number]['slots'][number]): CellState {
@@ -165,7 +166,14 @@ export const realApi: Api = {
       } catch (e) {
         // Până implementează backend-ul `/admin/dashboard` (501), compunem panoul din `/availability`.
         if (!(e instanceof ApiError) || e.status !== 501) throw e;
-        return toDashboard(await http.get<BAvailability>('/availability', { date }), blocks, photos);
+        // `/availability` cere `resource` sau `sport` (altfel 400) → o cerere pe fiecare resursă activă.
+        const parts = await Promise.all(
+          resources
+            .filter((r) => r.active !== false)
+            .map((r) => http.get<BAvailability>('/availability', { resource: r.id, date })),
+        );
+        const merged: BAvailability = { date, resources: parts.flatMap((p) => p.resources) };
+        return toDashboard(merged, blocks, photos);
       }
     },
   },

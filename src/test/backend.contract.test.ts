@@ -1,6 +1,7 @@
 import { http as mswHttp, HttpResponse } from 'msw';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { setAccessToken } from '@/api/http';
+import { toAuditAction } from '@/api/mappers';
 import { realApi } from '@/api/real';
 import { server } from '@/mocks/node';
 
@@ -43,6 +44,7 @@ describe('Adaptoare backend real', () => {
       cancel_free_hours: 2, checkin_minutes_before: 15, checkin_minutes_after: 10,
       no_show_threshold: 3, no_show_suspension_days: 14, waitlist_offer_minutes: 15,
       waitlist_simultaneous_under_hours: 6, default_slot_minutes: 60, member_replaces_external: true,
+      updated_by: null, updated_at: '2026-11-18T16:51:04Z',
     };
     let put: Record<string, unknown> = {};
     server.use(
@@ -59,6 +61,9 @@ describe('Adaptoare backend real', () => {
     expect(put.monthly_quota).toBe(10);
     expect(put.default_slot_minutes).toBe(60); // câmp necunoscut formularului, păstrat
     expect(put.member_replaces_external).toBe(true);
+    // câmpurile doar de citit NU se trimit înapoi (serverul le respinge cu 422)
+    expect(put).not.toHaveProperty('updated_at');
+    expect(put).not.toHaveProperty('updated_by');
   });
 
   it('sporturi: PUT cu name_ro / name_en / icon', async () => {
@@ -103,13 +108,16 @@ describe('Adaptoare backend real', () => {
         search = new URL(request.url).search;
         return HttpResponse.json({
           page: 1, page_size: 20, total: 1,
-          items: [{ id: 'e1', actor_id: 'abcdef12-0000', action: 'emergency_block', entity: 'block', entity_id: 'b1234567-x', at: '2026-11-17T10:00:00Z' }],
+          items: [{ id: 'e1', actor_id: 'abcdef12-0000', action: 'block.create', entity: 'occupancy', after: { kind: 'emergency' }, entity_id: 'b1234567-x', at: '2026-11-17T10:00:00Z' }],
         });
       }),
     );
     const p = await realApi.audit.list({ period: '7d', page: 1, pageSize: 20 });
     expect(search).toMatch(/from=.*&to=.*&page=1&page_size=20/);
     expect(p.items[0]!.action).toBe('emergency_block');
+    expect(toAuditAction({ id: 'x', actor_id: 'a', action: 'resource.update', entity: 'resource', at: '', before: { active: true }, after: { active: false } })).toBe('resource_deactivated');
+    expect(toAuditAction({ id: 'x', actor_id: 'a', action: 'sport.create', entity: 'sport', at: '' })).toBe('sport_created');
+    expect(toAuditAction({ id: 'x', actor_id: 'a', action: 'block.create', entity: 'occupancy', at: '', after: { kind: 'maintenance' } })).toBe('planned_block');
     expect(p.pageSize).toBe(20);
   });
 
@@ -146,20 +154,35 @@ describe('Adaptoare backend real', () => {
       mswHttp.get(`${B}/resources`, () => HttpResponse.json([{ id: 'r1', name: 'Teren 1' }])),
       mswHttp.get(`${B}/admin/blocks`, () => HttpResponse.json({ page: 1, page_size: 100, total: 0, items: [] })),
       mswHttp.get(`${B}/admin/dashboard`, () => HttpResponse.json({ code: 'NOT_IMPLEMENTED', message_ro: 'x', message_en: 'x' }, { status: 501 })),
-      mswHttp.get(`${B}/availability`, () =>
-        HttpResponse.json({
+      mswHttp.get(`${B}/availability`, ({ request }) => {
+        const u = new URL(request.url).searchParams;
+        // ca backend-ul real: fără `resource` sau `sport` → 400
+        if (!u.get('resource') && !u.get('sport')) return HttpResponse.json({ code: 'BAD_REQUEST', message_ro: 'x', message_en: 'x' }, { status: 400 });
+        return HttpResponse.json({
           date: '2026-11-17',
           resources: [{ resource_id: 'r1', resource_name: 'Teren 1', slots: [
             { start: '2026-11-17T08:00:00+02:00', end: '2026-11-17T09:00:00+02:00', status: 'free', bookable: true },
             { start: '2026-11-17T09:00:00+02:00', end: '2026-11-17T10:00:00+02:00', status: 'occupied', bookable: false, booking_id: 'k1' },
           ] }],
-        }),
-      ),
+        });
+      }),
     );
     const d = await realApi.dashboard.get('2026-11-17');
     expect(d.hours).toEqual([8, 9]);
     expect(d.rows[0]!.cells.map((c) => c.state)).toEqual(['free', 'booked']);
     expect(d.kpis.occupancyPct.value).toBe(50);
+  });
+
+  it('catalog: o resursă sub blocare activă primește tipul blocării (nu motivul)', async () => {
+    server.use(
+      mswHttp.get(`${B}/resources`, () => HttpResponse.json([{ id: 'r1', name: 'Teren 1', active: true }])),
+      mswHttp.get(`${B}/admin/blocks`, () =>
+        HttpResponse.json({ page: 1, page_size: 100, total: 1, items: [{ id: 'b1', resource_id: 'r1', kind: 'emergency', start: new Date(Date.now() - 3600_000).toISOString(), end: null, reason: 'Vreme severă', created_by: 'u1' }] }),
+      ),
+    );
+    const [r] = await realApi.catalog.resources();
+    expect(r!.blocked).toBe(true);
+    expect(r!.blockedLabel).toBe('emergency');
   });
 
   it('funcționalitățile încă neimplementate dau 501 clar', async () => {
