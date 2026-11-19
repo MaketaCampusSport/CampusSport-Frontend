@@ -112,7 +112,7 @@ export default function AuditPage() {
                 <tr key={e.id} className="border-b border-line last:border-b-0">
                   <td className="whitespace-nowrap py-3 pl-6 pr-3 text-sm text-muted">{fmtDayTime(e.at)}</td>
                   <td className="px-4 py-3"><span className="flex items-center gap-2 text-[15px] font-semibold"><Avatar name={e.actor.name} tone="soft" size="sm" />{e.actor.name}</span></td>
-                  <td className="px-4 py-3"><Badge tone={toneOf(e.action)}>{t(`audit.actions.${e.action}`)}</Badge></td>
+                  <td className="px-4 py-3"><Badge tone={toneOf(e.action)}>{t(`audit.actions.${e.action}`, { defaultValue: e.action })}</Badge></td>
                   <td className="py-3 pl-4 pr-6 text-[15px] text-ink">{e.object}</td>
                 </tr>
               ))}

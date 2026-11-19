@@ -151,7 +151,10 @@
     "otherAccount": "Folosește alt cont",
     "expiredTitle": "Sesiunea a expirat",
     "expiredBody": "Sesiunile de administrare durează 8 ore. Autentifică-te din nou.",
-    "demoHint": "Mod demo: orice cont este acceptat, codul este 123456."
+    "demoHint": "Mod demo: orice cont este acceptat, codul este 123456.",
+    "codeBodyAnon": "Introdu codul din aplicația de autentificare.",
+    "notEnrolledTitle": "Autentificator neconfigurat",
+    "notEnrolledBody": "Contul tău de administrator nu are încă 2FA. Cere unui administrator să ruleze `npm run admin:enroll-totp` pentru adresa ta de e-mail."
   },
   "channels": {
     "push": "Notificare push",
@@ -677,7 +680,6 @@
     "pageInfo": "Pagina {{page}} din {{pages}} · {{total}} înregistrări",
     "prev": "Pagina anterioară",
     "next": "Pagina următoare"
-    
   },
   "sports": {
     "title": "Sporturi și dotări",
@@ -687,24 +689,58 @@
     "editTitle": "Editează sportul",
     "emptyTitle": "Niciun sport definit",
     "emptyBody": "Adaugă primul sport, ca studenții să îl poată alege.",
-    "col": { "nameRo": "Denumire (RO)", "nameEn": "Denumire (EN)", "equipment": "Dotări necesare", "actions": "Acțiuni" },
+    "col": {
+      "nameRo": "Denumire (RO)",
+      "nameEn": "Denumire (EN)",
+      "equipment": "Dotări necesare",
+      "actions": "Acțiuni"
+    },
     "noEquipment": "Fără cerințe",
-    "fields": { "nameRo": "Denumire în română", "nameEn": "Denumire în engleză", "equipment": "Dotări necesare" },
-    "hint": { "equipment": "Doar resursele care au toate aceste dotări apar la alegerea sportului." },
-    "errors": { "required": "Câmp obligatoriu." },
+    "fields": {
+      "nameRo": "Denumire în română",
+      "nameEn": "Denumire în engleză",
+      "equipment": "Dotări necesare"
+    },
+    "hint": {
+      "equipment": "Doar resursele care au toate aceste dotări apar la alegerea sportului."
+    },
+    "errors": {
+      "required": "Câmp obligatoriu."
+    },
     "deleteTitle": "Ștergi sportul „{{name}}”?",
     "deleteBody": "Sportul dispare din aplicație. Nu poate fi șters dacă o resursă îl folosește.",
     "delete": "Șterge",
-    "toast": { "saved": "Sportul „{{name}}” a fost salvat.", "deleted": "Sportul a fost șters." }
+    "toast": {
+      "saved": "Sportul „{{name}}” a fost salvat.",
+      "deleted": "Sportul a fost șters."
+    }
   },
   "users": {
     "title": "Utilizatori",
     "subtitle": "Caută conturi și suspendă temporar utilizatorii (de ex. după no-show-uri repetate).",
     "search": "Caută după nume sau email",
-    "filters": { "role": "Rol", "status": "Stare", "allRoles": "Toate rolurile", "allStatuses": "Toate stările" },
-    "roles": { "student": "Student", "teacher": "Profesor", "external": "Extern" },
-    "status": { "active": "Activ", "suspended": "Suspendat" },
-    "col": { "user": "Utilizator", "role": "Rol", "status": "Stare", "noShows": "No-show luna aceasta", "actions": "Acțiuni" },
+    "filters": {
+      "role": "Rol",
+      "status": "Stare",
+      "allRoles": "Toate rolurile",
+      "allStatuses": "Toate stările"
+    },
+    "roles": {
+      "student": "Student",
+      "teacher": "Profesor",
+      "external": "Extern"
+    },
+    "status": {
+      "active": "Activ",
+      "suspended": "Suspendat"
+    },
+    "col": {
+      "user": "Utilizator",
+      "role": "Rol",
+      "status": "Stare",
+      "noShows": "No-show luna aceasta",
+      "actions": "Acțiuni"
+    },
     "until": "până la {{date}}",
     "emptyTitle": "Niciun utilizator găsit",
     "emptyBody": "Încearcă alte filtre sau alt text de căutare.",
@@ -712,9 +748,18 @@
     "reactivate": "Reactivează",
     "suspendTitle": "Suspendă contul lui {{name}}",
     "suspendBody": "Utilizatorul nu va putea face rezervări pe perioada suspendării.",
-    "fields": { "days": "Durată (zile)", "reason": "Motiv" },
-    "errors": { "days": "Introdu un număr între 1 și 365.", "reason": "Motivul este obligatoriu." },
-    "toast": { "suspended": "Contul lui {{name}} a fost suspendat.", "reactivated": "Contul lui {{name}} a fost reactivat." }
+    "fields": {
+      "days": "Durată (zile)",
+      "reason": "Motiv"
+    },
+    "errors": {
+      "days": "Introdu un număr între 1 și 365.",
+      "reason": "Motivul este obligatoriu."
+    },
+    "toast": {
+      "suspended": "Contul lui {{name}} a fost suspendat.",
+      "reactivated": "Contul lui {{name}} a fost reactivat."
+    }
   },
   "checkin": {
     "title": "Check-in la intrare",
@@ -746,7 +791,11 @@
     "code": "Cod de verificare",
     "confirm": "Confirmă",
     "cancel": "Renunță",
-    "errors": { "code": "Introdu cele 6 cifre." },
-    "toast": { "enabled": "Autentificarea în doi pași a fost configurată." }
+    "errors": {
+      "code": "Introdu cele 6 cifre."
+    },
+    "toast": {
+      "enabled": "Autentificarea în doi pași a fost configurată."
+    }
   }
 }

@@ -150,7 +150,10 @@
     "otherAccount": "Use another account",
     "expiredTitle": "Your session expired",
     "expiredBody": "Admin sessions last 8 hours. Please sign in again.",
-    "demoHint": "Demo mode: any account works, the code is 123456."
+    "demoHint": "Demo mode: any account works, the code is 123456.",
+    "codeBodyAnon": "Enter the code from your authenticator app.",
+    "notEnrolledTitle": "Authenticator not set up",
+    "notEnrolledBody": "Your administrator account has no 2FA yet. Ask an administrator to run `npm run admin:enroll-totp` for your e-mail."
   },
   "channels": {
     "push": "Push notification",
@@ -762,7 +765,7 @@
     "member": "University member",
     "external": "External visitor"
   },
-   "account": {
+  "account": {
     "title": "My account",
     "subtitle": "Account details and two-step authentication security.",
     "sessionTitle": "Session",
@@ -775,7 +778,11 @@
     "code": "Verification code",
     "confirm": "Confirm",
     "cancel": "Cancel",
-    "errors": { "code": "Enter the 6 digits." },
-    "toast": { "enabled": "Two-step authentication was set up." }
+    "errors": {
+      "code": "Enter the 6 digits."
+    },
+    "toast": {
+      "enabled": "Two-step authentication was set up."
+    }
   }
 }

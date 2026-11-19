@@ -93,6 +93,13 @@ export const router = createBrowserRouter([
     lazy: async () => ({ Component: (await import('@/features/admin/auth/LoginPage')).default }),
   },
   {
+    // Întoarcerea din SSO pentru administratori: aici se introduce codul TOTP (același ecran ca /admin/login).
+    path: '/auth/2fa',
+    HydrateFallback: FullPageSpinner,
+    errorElement: <RouteErrorPage />,
+    lazy: async () => ({ Component: (await import('@/features/admin/auth/LoginPage')).default }),
+  },
+  {
     path: '/admin',
     element: <RequireAdmin />,
     HydrateFallback: FullPageSpinner,
