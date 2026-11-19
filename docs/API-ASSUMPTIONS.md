@@ -1,49 +1,40 @@
-# Rute API presupuse de front-end
+# Contractul API folosit de front-end
 
-SDD 6.1 definește doar o parte dintre rute. Cele de mai jos sunt **presupuse** de front-end și trebuie confirmate sau ajustate cu echipa de backend.
-Implementarea lor este în `src/api/endpoints.ts`; tipurile în `src/api/types.ts`; simularea în `src/mocks/handlers.ts`.
-Prefix: `/api/v1`. Autentificare: token de acces în memorie (`Authorization: Bearer`) + refresh prin cookie HttpOnly (`POST /auth/refresh`, **de confirmat**, nu e în SDD 6.1). Erori: `{ code, message }` (sau `message_ro`/`message_en`) cu statusul HTTP corespunzător. `401` pe o rută diferită de `/auth/*` și `/me` → front-end-ul trimite la login („sesiune expirată”). Validările eșuate (inclusiv cod TOTP greșit pe `/admin/2fa/confirm`) trebuie să răspundă **422**, nu 401.
+Front-end-ul admin rulează în două moduri (`src/api/endpoints.ts`):
+- **Demo** (`VITE_USE_MOCKS=true`): serverul simulat MSW (`src/mocks/`), contract camelCase, cu rutele „presupuse” din tabelul de mai jos.
+- **Backend real** (`VITE_USE_MOCKS=false`): `src/api/real.ts`, contractul din `livrabil05/openapi.yaml` (`snake_case`). Conversia se face în `src/api/mappers.ts`; tipurile serverului sunt în `src/api/backend-types.ts`.
 
+Ce lipsește sau diferă pe backend este listat, cu prioritate, în `docs/BACKEND-CERERI.md`.
+Prefix: `/api/v1`. Autentificare: token de acces în memorie (`Authorization: Bearer`) + refresh prin cookie HttpOnly (`POST /auth/refresh` → `{ access_token }`). Erori: `{ code, message_ro, message_en, details? }`. `401` pe o rută diferită de `/auth/*` și `/me` → trimitere la login. Validările eșuate dau **422**.
 
-| Metodă și rută | Scop | Notă |
+## Rute confirmate (testate cu backend-ul real)
+
+| Front-end | Backend real | Observații |
 |---|---|---|
-| `GET /me` | Sesiunea curentă | 401 fără sesiune; `twoFactorVerified`, `expiresAt` (8 h) |
-| `POST /auth/admin/totp` | Pasul 2 (TOTP) | corp `{ code }` |
-| `POST /auth/logout` | Deconectare | |
-| `GET /admin/resources` | Toate resursele, inclusiv inactive | `blocked` calculat de server |
-| `POST/PATCH /admin/resources[/:id]` | Creare, editare, (re)activare | `PATCH { active }` |
-| `GET /admin/dashboard?date=` | Grila zilei + indicatori + urgențe active | |
-| `GET /admin/blocks` | Lista blocărilor + contoare pe stare | |
-| `GET /admin/blocks/preview` | Câte rezervări se anulează | `resourceId, from, to, excludeBlockId` |
-| `PATCH /admin/blocks/:id` | Editare blocare planificată | |
-| `DELETE /admin/blocks/:id` | Deblocare (încheie acum) | |
-| `GET /admin/blocks/:id/delivery` | Raport „anunțați / livrați” (SDD 7.3) | |
-| `POST /admin/schedule/import/preview` | Previzualizare fișier orar | multipart `file`; întoarce `importId` |
-| `POST /admin/schedule/classes/preview` | Previzualizare curs adăugat manual | |
-| `GET /admin/events`, `POST /admin/events/preview` | Listă și conflicte | |
-| `GET /admin/announcements`, `GET /admin/announcements/audience` | Istoric și „ajunge la N” | |
-| `GET /admin/audit` | Jurnal paginat | `q, actorId, period, page, pageSize`; `format=csv` pentru export |
-| `GET /admin/reports?month=&format=` | Export CSV/PDF | parametrul `format` este presupus |
-| `POST /auth/refresh` | Reînnoiește tokenul de acces | cookie HttpOnly; răspuns `{ accessToken }` |
-| `POST/PATCH/DELETE /admin/sports[/:id]` | CRUD sporturi (NFR-14) | corp `{ nameRo, nameEn, requiredEquipment[] }`; `DELETE` → 409 dacă o resursă folosește sportul |
-| `GET /admin/users` | Căutare conturi | `q, role, status` |
-| `POST /admin/users/:id/suspend` | Suspendare cont (FR-05) | corp `{ days, reason }` |
-| `POST /admin/users/:id/reactivate` | Reactivare cont | |
-| `POST /admin/check-in` | Check-in personal (FR-03/15) | corp `{ code }` (conținutul QR semnat); răspuns `CheckInResult` |
-| `POST /admin/2fa/setup` | Pornește configurarea TOTP | răspuns `{ secret, otpauthUrl }` |
-| `POST /admin/2fa/confirm` | Confirmă TOTP | corp `{ code }`; 422 dacă e greșit |
+| sesiune | `GET /me` | întoarce `User`; front-end-ul acceptă doar `role = admin`; `twoFactorVerified` = adevărat (sesiunea de admin se creează doar după TOTP); `expiresAt` din JWT |
+| pasul TOTP | `POST /auth/2fa/verify { challenge_id, code }` | `challenge_id` vine în adresa `/auth/2fa?challenge_id=…&return_to=…` după SSO |
+| reînnoire / ieșire | `POST /auth/refresh`, `POST /auth/logout` (204) | |
+| sporturi | `GET /sports`, `POST /admin/sports`, `PUT /admin/sports/{id}` | `name_ro`, `name_en`, `icon` (implicit `sport`), `required_equipment` |
+| resurse | `GET /resources?include_inactive=true`, `POST/PATCH /admin/resources[/{id}]` | program trimis pe toate cele 7 zile; `type` = `teren` |
+| blocări | `GET/POST /admin/blocks`, `DELETE /admin/blocks/{id}` (204), `GET /admin/blocks/{id}/delivery` | tip `cleaning` → `maintenance`; statusul (activ/planificat/istoric) se calculează în front-end |
+| setări | `GET/PUT /admin/settings` | mapare câmpuri: `quotaMonthly`↔`monthly_quota`, `maxActiveFuture`↔`max_active_bookings`, `windowStudentDays`↔`booking_window_days_student`, `windowTeacherDays`↔`booking_window_days_teacher`, `windowExternalHours`↔`booking_window_hours_external`, `cancelBeforeHours`↔`cancel_free_hours`, `checkinBeforeMin`↔`checkin_minutes_before`, `checkinAfterMin`↔`checkin_minutes_after`, `noShowLimit`↔`no_show_threshold`, `suspensionDays`↔`no_show_suspension_days`, `waitlistOfferMinutes`↔`waitlist_offer_minutes`; câmpurile necunoscute formularului se păstrează la PUT; `updated_by`/`updated_at` nu se trimit |
+| audit | `GET /admin/audit-log?actor&from&to&page&page_size` | perioada (24h/7d/30d/12m) → `from`/`to`; acțiunile serverului (`resource.update` …) se convertesc în cele din interfață |
+| utilizatori | `GET /admin/users?q&role&status&page&page_size`, `POST .../suspend { until, reason }`, `POST .../reactivate` | „zile” din formular → `until`; administratorii nu se afișează |
+| panou | `GET /admin/dashboard` (501) → rezervă `GET /availability?resource=…&date=…` | o cerere pe resursă activă |
 
-Rutele din SDD 6.1 folosite ca atare: `GET /auth/sso/login`, `GET /sports`, `POST /admin/blocks`, `POST /admin/schedule/import` (cu `importId`), `POST /admin/events`, `POST /admin/announcements`, `GET /admin/reports?month=`, `GET/PUT /admin/settings`.
+## Rute presupuse, încă fără corespondent pe backend (doar în modul demo)
 
-## Contractul `GET/PUT /admin/settings`
+`GET /admin/blocks/preview` (estimat din `/availability`), `PATCH /admin/blocks/{id}`, `POST /admin/schedule/import/preview`, `POST /admin/schedule/classes/preview`, `GET /admin/events`, `POST /admin/events/preview`, `GET /admin/announcements`, `GET /admin/announcements/audience`, `GET /admin/reports?month=&format=`, `DELETE /admin/sports/{id}`, `POST /admin/check-in`, `POST /admin/2fa/setup`, `POST /admin/2fa/confirm`.
+În modul backend real acestea răspund cu eroarea „funcționalitate indisponibilă pe server” (`501 NOT_IMPLEMENTED`).
 
-Un obiect JSON cu **exact** câmpurile din `RuleSettings` (`src/api/types.ts`), camelCase:
-`quotaMonthly, maxActiveFuture, quotaPerSport, windowTeacherDays, windowStudentDays, windowExternalHours, cancelBeforeHours, checkinBeforeMin, checkinAfterMin, noShowLimit, suspensionDays, waitlistOfferMinutes`.
-Valori implicite din SRS: 4, 2, false, 14, 7, 24, 2, 10, 15, 3, 14, 10.
+## Decizii
 
-## Decizii de confirmat cu backend-ul
-
-- **D2 – Setări:** `GET/PUT /admin/settings` întoarce/primește `RuleSettings` în camelCase (câmpurile de mai sus).
-- **D3 – Autentificare:** token de acces în memorie + refresh prin cookie HttpOnly; `POST /auth/refresh` nu e în SDD 6.1.
-- **D4 – Rute noi:** `/admin/sports`, `/admin/users`, `/admin/check-in`, `/admin/2fa/*` sunt presupuse de front-end (tabelul de mai sus).
-- **D5 – Cota „per sport” (SDD 8.2):** comutatorul `quotaPerSport` există, dar valorile separate pe sport nu sunt implementate până nu se decide regula.
+- **D2 – Setări:** închisă. Backend-ul folosește `snake_case`; front-end-ul convertește în `mappers.ts`.
+- **D3 – Autentificare:** închisă. Token de acces în memorie + refresh prin cookie HttpOnly (`POST /auth/refresh`, confirmat).
+- **D4 – Rute noi:** parțial confirmate (vezi tabelele de mai sus); restul în `BACKEND-CERERI.md`.
+- **D5 – Cota „per sport”:** deschisă. Backend-ul respinge `monthly_quota_per_sport` nevid (422) până se schimbă schema.
+- **D6 – Sport `icon`:** se trimite `sport` până se decide un câmp în formular.
+- **D7 – Program resursă:** un singur interval pe toate cele 7 zile.
+- **D8 – Blocare `cleaning`:** se trimite ca `maintenance`.
+- **D9 – Panou:** compus din `/availability` până se implementează `/admin/dashboard`.
+- **D10 – Dotări:** lista va fi fixă și comună front-end/backend (vezi `BACKEND-CERERI.md`, punctul 19).
