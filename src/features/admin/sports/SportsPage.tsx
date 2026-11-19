@@ -14,9 +14,8 @@ import { EmptyState, ErrorState, Skeleton } from '@/components/ui/feedback';
 import { Field, Input } from '@/components/ui/fields';
 import { Modal } from '@/components/ui/Modal';
 import { PageHeader } from '@/components/ui/PageHeader';
-import { EQUIPMENT_IDS } from '@/lib/validators';
 import { toast } from '@/stores/toastStore';
-import { sportName, useSports } from '../shared/queries';
+import { equipmentLabel, sportName, useEquipmentOptions, useSports } from '../shared/queries';
 
 interface FormState {
   nameRo: string;
@@ -31,6 +30,7 @@ export default function SportsPage() {
   const { t, i18n } = useTranslation();
   const qc = useQueryClient();
   const sports = useSports();
+  const equipmentOptions = useEquipmentOptions();
   const [editing, setEditing] = useState<Sport | 'new' | null>(null);
   const [form, setForm] = useState<FormState>(EMPTY);
   const [submitted, setSubmitted] = useState(false);
@@ -129,7 +129,7 @@ export default function SportsPage() {
                     ) : (
                       <span className="flex flex-wrap gap-1.5">
                         {s.requiredEquipment.map((e) => (
-                          <Badge key={e} tone="neutral">{t(`equipment.${e}`, { defaultValue: e })}</Badge>
+                          <Badge key={e} tone="neutral">{equipmentLabel(e)}</Badge>
                         ))}
                       </span>
                     )}
@@ -173,12 +173,12 @@ export default function SportsPage() {
             <legend className="mb-1 text-sm font-semibold text-ink">{t('sports.fields.equipment')}</legend>
             <p className="mb-2 text-sm text-muted">{t('sports.hint.equipment')}</p>
             <div className="grid grid-cols-2 gap-2">
-              {EQUIPMENT_IDS.map((id) => (
+              {equipmentOptions.map((id) => (
                 <CheckboxField
                   key={id}
                   checked={form.equipment.includes(id)}
                   onCheckedChange={(on) => toggleEquipment(id, on)}
-                  label={t(`equipment.${id}`)}
+                  label={equipmentLabel(id)}
                 />
               ))}
             </div>

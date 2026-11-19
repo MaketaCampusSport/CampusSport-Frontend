@@ -1,5 +1,6 @@
 import { API_BASE, USE_MOCKS } from './config';
 import { http } from './http';
+import { realApi } from './real';
 import type {
   AdminUser,
   Announcement,
@@ -43,7 +44,7 @@ import type {
  * cele marcate „presupus” trebuie confirmate cu echipa de backend
  * (lista completă: docs/API-ASSUMPTIONS.md).
  */
-export const api = {
+const mockApi = {
   auth: {
     /** presupus: starea sesiunii curente (401 dacă nu există sesiune SSO). */
     me: () => http.get<SessionInfo>('/me'),
@@ -62,8 +63,9 @@ export const api = {
       return 'redirected';
     },
     /** presupus: al doilea pas TOTP pentru administratori (NFR-08). */
-    verifyTotp: (code: string) => http.post<SessionInfo>('/auth/admin/totp', { code }),
-    /** presupus */
+    // `challengeId` e folosit doar de backend-ul real (vezi real.ts); serverul simulat îl ignoră.
+    verifyTotp: (code: string, _challengeId?: string) => http.post<SessionInfo>('/auth/admin/totp', { code }),
+            /** presupus */
     logout: () => http.post<void>('/auth/logout'),
   },
 
@@ -202,5 +204,11 @@ export const api = {
     totpConfirm: (code: string) => http.post<void>('/admin/2fa/confirm', { code }),
   },
 };
+
+/** Forma comună a API-ului: o respectă atât serverul simulat, cât și backend-ul real. */
+export type Api = typeof mockApi;
+
+/** `VITE_USE_MOCKS=true` => MSW (demo); altfel => backend-ul NestJS prin `real.ts`. */
+export const api: Api = USE_MOCKS ? mockApi : realApi;
 
 export type { AdminUser };
